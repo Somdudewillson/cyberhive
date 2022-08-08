@@ -4,6 +4,7 @@ package somdudewillson.cyberhive.block;
 import somdudewillson.cyberhive.procedure.ProcedureTestUpdateTick;
 import somdudewillson.cyberhive.procedure.ProcedureTestNeighbourBlockChanges;
 import somdudewillson.cyberhive.item.ItemNaniteLump;
+import somdudewillson.cyberhive.creativetab.TabCyberHiveTab;
 import somdudewillson.cyberhive.ElementsCyberhiveMod;
 
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -19,7 +20,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.Item;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.material.Material;
@@ -58,7 +58,7 @@ public class BlockTest extends ElementsCyberhiveMod.ModElement {
 			setResistance(10F);
 			setLightLevel(0F);
 			setLightOpacity(15);
-			setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+			setCreativeTab(TabCyberHiveTab.tab);
 		}
 
 		@Override
