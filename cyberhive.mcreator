@@ -1,0 +1,71 @@
+{
+  "mod_elements": [
+    {
+      "name": "RawNaniteGoo",
+      "type": "block",
+      "sortid": 1,
+      "compiles": false,
+      "locked_code": true,
+      "registry_name": "raw_nanite_goo"
+    },
+    {
+      "name": "Test",
+      "type": "block",
+      "sortid": 2,
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "test"
+    },
+    {
+      "name": "TestNeighbourBlockChanges",
+      "type": "procedure",
+      "sortid": 3,
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "test_neighbour_block_changes",
+      "metadata": {
+        "dependencies": []
+      }
+    },
+    {
+      "name": "TestUpdateTick",
+      "type": "procedure",
+      "sortid": 4,
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "test_update_tick",
+      "metadata": {
+        "dependencies": []
+      }
+    }
+  ],
+  "variable_elements": [],
+  "sound_elements": [],
+  "language_map": {
+    "en_us": {
+      "block.cyberhive.test": "Test",
+      "block.cyberhive.raw_nanite_goo": "Raw Nanite Goo"
+    }
+  },
+  "foldersRoot": {
+    "name": "~",
+    "children": []
+  },
+  "workspaceSettings": {
+    "modid": "cyberhive",
+    "modName": "Cyber Hive",
+    "version": "0.1.0",
+    "author": "Somdudewillson",
+    "license": "All Rights Reserved",
+    "disableForgeVersionCheck": true,
+    "serverSideOnly": false,
+    "requiredMods": [],
+    "dependencies": [],
+    "dependants": [],
+    "mcreatorDependencies": [],
+    "currentGenerator": "forge-1.18.2",
+    "modElementsPackage": "somdudewillson.cyberhive",
+    "lockBaseModFiles": false
+  },
+  "mcreatorVersion": 202200120510
+}
