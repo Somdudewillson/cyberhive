@@ -4,7 +4,7 @@
       "name": "RawNaniteGoo",
       "type": "block",
       "sortid": 1,
-      "compiles": false,
+      "compiles": true,
       "locked_code": true,
       "registry_name": "raw_nanite_goo"
     },
@@ -37,14 +37,32 @@
       "metadata": {
         "dependencies": []
       }
+    },
+    {
+      "name": "NaniteLump",
+      "type": "item",
+      "sortid": 5,
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "nanite_lump"
+    },
+    {
+      "name": "CyberHiveTab",
+      "type": "tab",
+      "sortid": 5,
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "cyber_hive_tab"
     }
   ],
   "variable_elements": [],
   "sound_elements": [],
   "language_map": {
     "en_us": {
+      "item.cyberhive.nanite_lump": "Nanite Lump",
       "block.cyberhive.test": "Test",
-      "block.cyberhive.raw_nanite_goo": "Raw Nanite Goo"
+      "block.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
+      "itemGroup.tabcyber_hive_tab": "Cyber Hive Tab"
     }
   },
   "foldersRoot": {

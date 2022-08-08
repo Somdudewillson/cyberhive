@@ -1,0 +1,11 @@
+{
+  "_fv": 28,
+  "_type": "tab",
+  "definition": {
+    "name": "Cyber Hive Tab",
+    "icon": {
+      "value": "CUSTOM:NaniteLump"
+    },
+    "showSearch": false
+  }
+}

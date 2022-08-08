@@ -13,6 +13,7 @@
  */
 package somdudewillson.cyberhive;
 
+import somdudewillson.cyberhive.init.CyberhiveModTabs;
 import somdudewillson.cyberhive.init.CyberhiveModItems;
 import somdudewillson.cyberhive.init.CyberhiveModBlocks;
 
@@ -43,7 +44,7 @@ public class CyberhiveMod {
 	private static int messageID = 0;
 
 	public CyberhiveMod() {
-
+		CyberhiveModTabs.load();
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		CyberhiveModBlocks.REGISTRY.register(bus);
 		CyberhiveModItems.REGISTRY.register(bus);
