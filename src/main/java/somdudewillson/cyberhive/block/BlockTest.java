@@ -3,6 +3,7 @@ package somdudewillson.cyberhive.block;
 
 import somdudewillson.cyberhive.procedure.ProcedureTestUpdateTick;
 import somdudewillson.cyberhive.procedure.ProcedureTestNeighbourBlockChanges;
+import somdudewillson.cyberhive.item.ItemNaniteLump;
 import somdudewillson.cyberhive.ElementsCyberhiveMod;
 
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -12,7 +13,10 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 
 import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.NonNullList;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.Item;
 import net.minecraft.creativetab.CreativeTabs;
@@ -55,6 +59,11 @@ public class BlockTest extends ElementsCyberhiveMod.ModElement {
 			setLightLevel(0F);
 			setLightOpacity(15);
 			setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+		}
+
+		@Override
+		public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+			drops.add(new ItemStack(ItemNaniteLump.block, (int) (1)));
 		}
 
 		@Override
