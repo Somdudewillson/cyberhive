@@ -1,22 +1,28 @@
-
 package somdudewillson.cyberhive.block;
 
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.core.BlockPos;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
+
+import net.minecraft.core.BlockPos;
 
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
@@ -70,8 +76,7 @@ public class RawNaniteGooBlock extends Block {
 	
 	@Override
 	public void neighborChanged(BlockState blockstate, Level world, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean moving) {
-		if (!world.isAreaLoaded(pos, 1)) return; // Prevent loading unloaded chunks with block update
-		super.neighborChanged(blockstate, world, pos, neighborBlock, fromPos, moving);
+		if (!world.isLoaded(pos)) { return; } // Prevent loading unloaded chunks with block update
 		
 		BlockPos fallPos = pos.below();
 	}
