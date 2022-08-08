@@ -21,8 +21,12 @@ import java.util.Collections;
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
 	public static final IntegerProperty LAYERS = BlockStateProperties.LAYERS;
-	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[]{Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
-	
+	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[]{Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D),
+			Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D),
+			Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D),
+			Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
+			Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
+
 	public RawNaniteGooBlock() {
 		super(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).sound(SoundType.SLIME_BLOCK).strength(-1, 3600000).noCollission()
 				.friction(0.7f).speedFactor(0.9f).jumpFactor(0.9f).randomTicks());
@@ -42,19 +46,19 @@ public class RawNaniteGooBlock extends Block {
 	public VoxelShape getShape(BlockState state, BlockGetter blkGetter, BlockPos pos, CollisionContext colCtx) {
 		return SHAPE_BY_LAYER[state.getValue(LAYERS)];
 	}
-	
+
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter blkGetter, BlockPos pos, CollisionContext colCtx) {
 		return SHAPE_BY_LAYER[state.getValue(LAYERS) - 1];
 	}
-	
+
 	public VoxelShape getBlockSupportShape(BlockState state, BlockGetter blkGetter, BlockPos pos) {
 		return SHAPE_BY_LAYER[state.getValue(LAYERS)];
 	}
-	
+
 	public VoxelShape getVisualShape(BlockState state, BlockGetter blkGetter, BlockPos pos, CollisionContext colCtx) {
 		return SHAPE_BY_LAYER[state.getValue(LAYERS)];
 	}
-	
+
 	public boolean useShapeForLightOcclusion(BlockState state) {
 		return true;
 	}
@@ -67,12 +71,12 @@ public class RawNaniteGooBlock extends Block {
 		return Collections.singletonList(new ItemStack(this, 1));
 	}
 
-	
 	@Override
 	public void neighborChanged(BlockState blockstate, Level world, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean moving) {
-		if (!world.isAreaLoaded(pos, 1)) return; // Prevent loading unloaded chunks with block update
+		if (!world.isAreaLoaded(pos, 1))
+			return; // Prevent loading unloaded chunks with block update
 		super.neighborChanged(blockstate, world, pos, neighborBlock, fromPos, moving);
-		
+
 		BlockPos fallPos = pos.below();
 	}
 }
