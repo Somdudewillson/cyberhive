@@ -1,6 +1,4 @@
-item.nanite_lump.name=Nanite Lump
-item.cyberhive.nanite_lump=Nanite Lump
-block.cyberhive.test=Test
-tile.test.name=Test
-block.cyberhive.raw_nanite_goo=Raw Nanite Goo
-itemGroup.tabcyber_hive_tab=Cyber Hive Tab
+item.cyberhive.nanite_lump.name=Nanite Lump
+block.cyberhive.raw_nanite_goo.name=Raw Nanite Goo
+tile.cyberhive.raw_nanite_goo.name=Raw Nanite Goo
+itemGroup.cyberhive=Cyber Hive Tab
