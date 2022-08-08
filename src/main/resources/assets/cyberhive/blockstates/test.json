@@ -1,7 +1,7 @@
 {
   "variants": {
-    "": {
-      "model": "cyberhive:block/test"
+    "normal": {
+      "model": "cyberhive:test"
     }
   }
 }
