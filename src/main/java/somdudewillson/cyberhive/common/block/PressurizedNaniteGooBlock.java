@@ -64,6 +64,7 @@ public class PressurizedNaniteGooBlock extends Block {
 
 	@Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rng) {
+		if (worldIn.isRemote) { return; } 
 		if (!worldIn.isBlockLoaded(pos)) { return; } // Prevent loading unloaded chunks with block update
 		
 		BlockPos[] adjacent = new BlockPos[] {pos.down(),pos.north(),pos.east(),pos.south(),pos.west(),pos.up()};

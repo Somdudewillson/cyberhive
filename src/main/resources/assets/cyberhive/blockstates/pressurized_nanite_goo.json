@@ -44,6 +44,9 @@
     },
     "density=15": {
       "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=16": {
+      "model": "cyberhive:raw_nanite_goo"
     }
   }
 }

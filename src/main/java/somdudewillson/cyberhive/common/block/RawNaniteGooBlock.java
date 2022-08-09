@@ -12,6 +12,7 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
@@ -35,7 +36,6 @@ public class RawNaniteGooBlock extends Block {
 		setRegistryName("raw_nanite_goo");
 		setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
 		setSoundType(SoundType.SLIME);
-        setTickRandomly(true);
 		setCreativeTab(TabCyberHive.CYBERHIVE_TAB);
         setDefaultState(this.blockState.getBaseState().withProperty(LAYERS, Integer.valueOf(MAX_HEIGHT)));
 	}
@@ -85,6 +85,7 @@ public class RawNaniteGooBlock extends Block {
 
 	@Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rng) {
+		if (worldIn.isRemote) { return; } 
 		if (!worldIn.isBlockLoaded(pos)) { return; } // Prevent loading unloaded chunks with block update
 
 		Tuple<BlockPos,IBlockState> newTarget = tryFall(state, worldIn, pos);		
@@ -105,15 +106,30 @@ public class RawNaniteGooBlock extends Block {
 			}
 			
 			IBlockState adjState = worldIn.getBlockState(adjPos);
-			if (adjState.getBlock() == CyberBlocks.RAW_NANITE_GOO
+			Block adjBlock = adjState.getBlock();
+			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
 					&& adjState.getValue(LAYERS)<layers-1) {
 				IBlockState newState = adjState.withProperty(LAYERS, adjState.getValue(LAYERS)+1);
 				worldIn.setBlockState(adjPos, newState);
 				tryFall(newState, worldIn, adjPos);
 				layers--;
+				continue;
 			}
 		}
-		worldIn.setBlockState(pos, state.withProperty(LAYERS, layers));
+		
+		IBlockState belowBlockState = worldIn.getBlockState(pos.down());
+		if (belowBlockState.getBlock() == Blocks.GRASS) {
+			worldIn.setBlockState(pos.down(), CyberBlocks.NANITE_GRASS.getDefaultState());
+			layers--;
+		}
+		
+		if (layers>0) {
+			worldIn.setBlockState(pos, state.withProperty(LAYERS, layers));
+            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+            worldIn.notifyNeighborsOfStateChange(pos, this, false);
+		} else {
+			worldIn.setBlockToAir(pos);
+		}
     }
 	
 	private Tuple<BlockPos,IBlockState> tryFall(IBlockState state, World worldIn, BlockPos pos) {
@@ -178,5 +194,10 @@ public class RawNaniteGooBlock extends Block {
 
     protected BlockStateContainer createBlockState() {
         return new BlockStateContainer(this, new IProperty[] {LAYERS});
+    }
+    
+    @Override
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
+    	worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
     }
 }

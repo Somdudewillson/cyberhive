@@ -3,4 +3,6 @@ block.cyberhive.raw_nanite_goo.name=Raw Nanite Goo
 tile.cyberhive.raw_nanite_goo.name=Raw Nanite Goo
 block.cyberhive.pressurized_nanite_goo.name=Pressurized Nanite Goo
 tile.cyberhive.pressurized_nanite_goo.name=Pressurized Nanite Goo
+block.cyberhive.nanite_grass.name=Nanite Grass
+tile.cyberhive.nanite_grass.name=Nanite Grass
 itemGroup.cyberhive=Cyber Hive Tab

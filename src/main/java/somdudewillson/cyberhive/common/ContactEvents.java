@@ -16,7 +16,7 @@ public class ContactEvents {
 		EntityLivingBase livingEntity = event.getEntityLiving();
 		World world = livingEntity.getEntityWorld();
 		if (world.isRemote) { return; }
-		if ((world.getTotalWorldTime() & 15) != 0) { return; }
+		if ((world.getTotalWorldTime()+livingEntity.getEntityId() & 15) != 0) { return; }
 		
 		if (!doContactEffects(livingEntity,world,livingEntity.getPosition())) {
 			doContactEffects(livingEntity,world,livingEntity.getPosition().down());
@@ -28,7 +28,11 @@ public class ContactEvents {
 		Block blockAtPos = stateAtPos.getBlock();
 		if (blockAtPos == CyberBlocks.RAW_NANITE_GOO
 				|| blockAtPos == CyberBlocks.PRESSURIZED_NANITE_GOO) {
-			livingEntity.addPotionEffect(new PotionEffect(CyberPotions.NANITE_CONVERT, 100));
+			livingEntity.addPotionEffect(new PotionEffect(CyberPotions.NANITE_CONVERT, 120));
+			return true;
+		}
+		if (blockAtPos == CyberBlocks.NANITE_GRASS) {
+			livingEntity.addPotionEffect(new PotionEffect(CyberPotions.NANITE_CONVERT, 40));
 			return true;
 		}
 		return false;

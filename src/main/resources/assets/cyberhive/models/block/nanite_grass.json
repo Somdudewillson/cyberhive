@@ -1,0 +1,9 @@
+{
+    "parent": "minecraft:block/cube_bottom_top",
+    "textures": {
+        "particle": "minecraft:blocks/dirt",
+        "bottom": "minecraft:blocks/dirt",
+        "top": "cyberhive:blocks/nanite_grass_top",
+        "side": "cyberhive:blocks/nanite_grass_side"
+    }
+}
