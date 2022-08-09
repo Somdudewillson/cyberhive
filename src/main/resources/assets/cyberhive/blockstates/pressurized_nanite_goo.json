@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "density=1": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=2": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=3": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=4": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=5": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=6": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=7": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=8": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=9": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=10": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=11": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=12": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=13": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=14": {
+      "model": "cyberhive:raw_nanite_goo"
+    },
+    "density=15": {
+      "model": "cyberhive:raw_nanite_goo"
+    }
+  }
+}

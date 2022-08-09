@@ -1,4 +1,6 @@
 item.cyberhive.nanite_lump.name=Nanite Lump
 block.cyberhive.raw_nanite_goo.name=Raw Nanite Goo
 tile.cyberhive.raw_nanite_goo.name=Raw Nanite Goo
+block.cyberhive.pressurized_nanite_goo.name=Pressurized Nanite Goo
+tile.cyberhive.pressurized_nanite_goo.name=Pressurized Nanite Goo
 itemGroup.cyberhive=Cyber Hive Tab

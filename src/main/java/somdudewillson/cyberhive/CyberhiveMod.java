@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import somdudewillson.cyberhive.common.ContactEvents;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberItems;
 
@@ -26,6 +27,7 @@ public class CyberhiveMod {
         logger = event.getModLog();
         MinecraftForge.EVENT_BUS.register(new CyberBlocks());
         MinecraftForge.EVENT_BUS.register(new CyberItems());
+        MinecraftForge.EVENT_BUS.register(new ContactEvents());
     }
 
     @EventHandler
