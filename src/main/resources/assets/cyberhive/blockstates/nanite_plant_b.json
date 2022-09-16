@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "core_dir=0": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=1": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=2": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=3": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=4": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=5": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=6": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=7": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=8": {
+      "model": "cyberhive:nanite_log"
+    },
+    "core_dir=9": {
+      "model": "cyberhive:nanite_log"
+    }
+  }
+}

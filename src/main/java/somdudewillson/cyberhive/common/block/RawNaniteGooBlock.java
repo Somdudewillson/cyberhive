@@ -12,7 +12,6 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
@@ -23,12 +22,15 @@ import net.minecraft.world.World;
 import somdudewillson.cyberhive.CyberhiveMod;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberItems;
+import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
+import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
 import somdudewillson.cyberhive.common.creativetab.TabCyberHive;
 
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
 	public static final PropertyInteger LAYERS = PropertyInteger.create("layers", 1, MAX_HEIGHT);
 	protected static final AxisAlignedBB[] SHAPE_BY_LAYER = new AxisAlignedBB[] {new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D)};
+	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() };
 	
 	public RawNaniteGooBlock() {
 		super(Material.IRON);
@@ -39,10 +41,14 @@ public class RawNaniteGooBlock extends Block {
 		setCreativeTab(TabCyberHive.CYBERHIVE_TAB);
         setDefaultState(this.blockState.getBaseState().withProperty(LAYERS, Integer.valueOf(MAX_HEIGHT)));
 	}
+	
+	@Override
+	public int tickRate(World worldIn) {
+		return 20;
+	}
 
 	@Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
         return SHAPE_BY_LAYER[((Integer)state.getValue(LAYERS)).intValue()];
     }
     
@@ -92,10 +98,15 @@ public class RawNaniteGooBlock extends Block {
 		pos = newTarget.getFirst();
 		state = newTarget.getSecond();
 		
-		BlockPos[] adjacent = new BlockPos[] {pos.north(),pos.east(),pos.south(),pos.west()};
+		BlockPos[] adjacent = new BlockPos[] {pos.north(),pos.east(),pos.south(),pos.west(),pos.up(),pos.down()};
+		IBlockState[] adjStates = new IBlockState[adjacent.length];
 		int layers = state.getValue(LAYERS);
-		for (int adjIdx=0;adjIdx<adjacent.length && layers>1;adjIdx++) {
+		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
 			BlockPos adjPos = adjacent[adjIdx];
+			IBlockState adjState = worldIn.getBlockState(adjPos);
+			adjStates[adjIdx] = adjState;
+			if (layers<=1) { continue; }
+			if (adjIdx>3) { continue; }
 			
 			if (worldIn.isAirBlock(adjPos)) {
 				IBlockState newState = state.getBlock().getDefaultState().withProperty(LAYERS, 1);
@@ -105,7 +116,6 @@ public class RawNaniteGooBlock extends Block {
 				continue;
 			}
 			
-			IBlockState adjState = worldIn.getBlockState(adjPos);
 			Block adjBlock = adjState.getBlock();
 			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
 					&& adjState.getValue(LAYERS)<layers-1) {
@@ -117,9 +127,28 @@ public class RawNaniteGooBlock extends Block {
 			}
 		}
 		
-		IBlockState belowBlockState = worldIn.getBlockState(pos.down());
-		if (belowBlockState.getBlock() == Blocks.GRASS) {
-			worldIn.setBlockState(pos.down(), CyberBlocks.NANITE_GRASS.getDefaultState());
+		IBlockConversion currentPriorityConversion = null;
+		int conversionTargetAdjIdx = 0;
+		int currentPriority = -1;
+		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
+			BlockPos adjPos = adjacent[adjIdx];
+			IBlockState adjState = adjStates[adjIdx];
+			
+			for (IBlockConversion conversion : blockConversions) {
+				int priority = conversion.getPriority();
+				
+				if (priority>=currentPriority && conversion.validTarget(adjPos, adjState, worldIn)) {
+					currentPriorityConversion = conversion;
+					conversionTargetAdjIdx = adjIdx;
+					currentPriority = priority;
+				}
+			}
+		}
+		if (currentPriority>-1) {
+			currentPriorityConversion.doConversion(
+					adjacent[conversionTargetAdjIdx],
+					adjStates[conversionTargetAdjIdx],
+					worldIn);
 			layers--;
 		}
 		

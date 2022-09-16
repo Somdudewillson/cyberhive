@@ -8,6 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 
 public class ContactEvents {
 	
@@ -23,11 +24,23 @@ public class ContactEvents {
 		}
 	}
 	
-	private boolean doContactEffects(EntityLivingBase livingEntity, World world, BlockPos pos) {
-		IBlockState stateAtPos = world.getBlockState(pos);
+	private boolean doContactEffects(EntityLivingBase livingEntity, World worldIn, BlockPos pos) {
+		IBlockState stateAtPos = worldIn.getBlockState(pos);
 		Block blockAtPos = stateAtPos.getBlock();
-		if (blockAtPos == CyberBlocks.RAW_NANITE_GOO
-				|| blockAtPos == CyberBlocks.PRESSURIZED_NANITE_GOO) {
+		
+		if (blockAtPos == CyberBlocks.RAW_NANITE_GOO) {
+			livingEntity.addPotionEffect(new PotionEffect(CyberPotions.NANITE_CONVERT, 120));
+			
+			int layers = stateAtPos.getValue(RawNaniteGooBlock.LAYERS);
+			layers--;
+			if (layers>0) {
+				worldIn.setBlockState(pos, stateAtPos.withProperty(RawNaniteGooBlock.LAYERS, layers));
+			} else {
+				worldIn.setBlockToAir(pos);
+			}
+			return true;
+		}
+		if (blockAtPos == CyberBlocks.PRESSURIZED_NANITE_GOO) {
 			livingEntity.addPotionEffect(new PotionEffect(CyberPotions.NANITE_CONVERT, 120));
 			return true;
 		}
