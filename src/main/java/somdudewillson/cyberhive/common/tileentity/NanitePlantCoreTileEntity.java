@@ -1,5 +1,8 @@
 package somdudewillson.cyberhive.common.tileentity;
 
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -87,8 +90,14 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
 	public static boolean isNaniteStem(IBlockState state) {
 		return (state.getBlock() instanceof NanitePlantBlockA) || (state.getBlock() instanceof NanitePlantBlockB);
 	}
-	public static BlockPos[] getDiagAdjPosArray(BlockPos center) {
-		return new BlockPos[] {center.up(),center.north(),center.east(),center.south(),center.west(),center.down()};
+	private static BlockPos[] diagonalOffsets = 
+			StreamSupport.stream(BlockPos.getAllInBox(-1, -1, -1, 1, 1, 1).spliterator(),false)
+			.filter(pos->!pos.equals(BlockPos.ORIGIN))
+			.toArray(BlockPos[]::new);
+	public static BlockPos[] getDiagAdjPosArray(final BlockPos center) {
+		return Stream.of(diagonalOffsets)
+				.map(pos->center.add(pos))
+				.toArray(BlockPos[]::new);
 	}
 
 }
