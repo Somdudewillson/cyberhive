@@ -12,6 +12,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+import scala.actors.threadpool.Arrays;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockA;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockB;
 import somdudewillson.cyberhive.common.utils.OreDictUtils;
@@ -29,6 +30,13 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
 	private byte level = 0;
 	private static String growthKey = "growth_data";
 	private byte[] growthData = new byte[26];
+	
+	public NanitePlantCoreTileEntity() {
+		super();
+		
+		Arrays.fill(growthData, Byte.MIN_VALUE);
+		this.markDirty();
+	}
 	
 	@Override
     public void onLoad() {
@@ -78,7 +86,7 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
 		for (BlockPos adj : adjacents) {
 			IBlockState adjState = worldIn.getBlockState(adj);
 			if (isLoglike(adjState,adj,worldIn) || isNaniteStem(adjState)) {
-				NanitePlantGrowerTileEntity.grow(worldIn, pos, adj, pos, (byte)(Byte.MIN_VALUE+3));
+				NanitePlantGrowerTileEntity.grow(worldIn, pos, adj, pos, (byte)(Byte.MIN_VALUE+3), growthData);
 			}
 		}
 	}
@@ -98,6 +106,17 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
 		return Stream.of(diagonalOffsets)
 				.map(pos->center.add(pos))
 				.toArray(BlockPos[]::new);
+	}
+	
+	public void updateStemGrowthData(byte newDir) {
+		if (growthData[newDir] == Byte.MAX_VALUE) {
+			for (int i=0;i<growthData.length;i++) {
+				growthData[newDir]/=2;
+			}
+		}
+		
+		growthData[newDir]++;
+		this.markDirty();
 	}
 
 }
