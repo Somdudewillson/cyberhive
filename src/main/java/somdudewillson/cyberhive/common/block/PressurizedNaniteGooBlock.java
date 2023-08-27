@@ -79,6 +79,7 @@ public class PressurizedNaniteGooBlock extends Block {
 			return true;
 		}
 		if (belowBlockState.canBeReplaced(new BlockItemUseContext(pLevel, null, null, ItemStack.EMPTY, new BlockRayTraceResult(Vector3d.ZERO, Direction.UP, pPos, false)))) {
+			pLevel.destroyBlock(pPos.below(), true);
 			pLevel.setBlockAndUpdate(pPos.below(), pState);
 			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
 			return true;
