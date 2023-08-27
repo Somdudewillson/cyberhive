@@ -1,0 +1,10 @@
+{
+"item.cyberhive.nanite_lump": "Nanite Lump",
+"block.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
+"tile.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
+"block.cyberhive.pressurized_nanite_goo": "Pressurized Nanite Goo",
+"tile.cyberhive.pressurized_nanite_goo": "Pressurized Nanite Goo",
+"block.cyberhive.nanite_grass": "Nanite Grass",
+"tile.cyberhive.nanite_grass": "Nanite Grass",
+"itemGroup.cyberhive": "Cyber Hive Tab"
+}
