@@ -10,7 +10,7 @@ public class NaniteGrassConversion implements IBlockConversion {
 
 	@Override
 	public boolean validTarget(BlockPos inPos, BlockState state, World worldIn) {
-		return state.getBlock() == Blocks.GRASS;
+		return state.getBlock() == Blocks.GRASS_BLOCK;
 	}
 
 	@Override
