@@ -13,16 +13,20 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.block.material.PushReaction;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -197,8 +201,9 @@ public class RawNaniteGooBlock extends Block {
 			}
 			
 			BlockState fallState = worldIn.getBlockState(fallPos);
-			if (fallState.getBlock() == CyberBlocks.RAW_NANITE_GOO
-					&& fallState.getValue(LAYERS)<MAX_HEIGHT) {
+			if (fallState.getBlock() == CyberBlocks.RAW_NANITE_GOO) {
+				if (fallState.getValue(LAYERS)>=MAX_HEIGHT) { continue; }
+				
 				int targetLayers = fallState.getValue(LAYERS);
 				int ownLayers = state.getValue(LAYERS);
 				int availableSpace = MAX_HEIGHT-targetLayers;
@@ -217,6 +222,16 @@ public class RawNaniteGooBlock extends Block {
 					
 					result = new Tuple<BlockPos, BlockState>(pos,newState);
 				}
+				continue;
+			}
+			
+			if (fallState.canBeReplaced(new BlockItemUseContext(worldIn, null, null, ItemStack.EMPTY, new BlockRayTraceResult(Vector3d.ZERO, Direction.UP, pos, false)))) {
+				worldIn.destroyBlock(fallPos, true);
+				worldIn.setBlockAndUpdate(fallPos, state);
+				worldIn.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+				
+				result = new Tuple<BlockPos, BlockState>(fallPos, state);
+				keepFalling = true;
 			}
 		} while (keepFalling);
 		
