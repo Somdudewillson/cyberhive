@@ -11,8 +11,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.block.material.PushReaction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
+import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.Tuple;
@@ -31,11 +34,12 @@ import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, MAX_HEIGHT);
-	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {VoxelShapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D)};
+	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {VoxelShapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
 	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() };
+	protected static final Material NANITE_GOO_MATERIAL = new Material(MaterialColor.METAL, false, false, false, false, false, true, PushReaction.DESTROY); 
 	
 	public RawNaniteGooBlock() {
-		super(AbstractBlock.Properties.of(Material.METAL).strength(2.0F, 3.0F).sound(SoundType.SLIME_BLOCK));
+		super(AbstractBlock.Properties.of(NANITE_GOO_MATERIAL).strength(4.0F, 6.0F).speedFactor(0.7F).sound(SoundType.SLIME_BLOCK));
 
 		setRegistryName("raw_nanite_goo");
 		// setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
@@ -46,6 +50,17 @@ public class RawNaniteGooBlock extends Block {
 		return 20;
 	}
 
+	@Override
+	public boolean isPathfindable(BlockState pState, IBlockReader pLevel, BlockPos pPos, PathType pType) {
+		switch (pType) {
+		case LAND:
+			return pState.getValue(LAYERS) < MAX_HEIGHT / 2;
+		case WATER:
+		case AIR:
+		default:
+			return false;
+		}
+	}
 	@Override
 	public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
 		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
