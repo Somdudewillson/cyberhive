@@ -3,6 +3,7 @@ package somdudewillson.cyberhive.common.block;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -85,11 +86,52 @@ public class RawNaniteGooBlock extends Block {
 		pState = newTarget.getB();
 		
 		final BlockPos[] adjacent = new BlockPos[] {pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above(),pPos.below()};
-		BlockState[] adjStates = new BlockState[adjacent.length];
-		spread(pState, pLevel, adjacent, adjStates);
+		final BlockState[] adjStates = new BlockState[adjacent.length];
+		IntStream.range(0, adjacent.length)
+			.forEach(adjIdx->adjStates[adjIdx]=pLevel.getBlockState(adjacent[adjIdx]));
 		
 		int layers = pState.getValue(LAYERS);
+		layers = spread(pState, pLevel, adjacent, adjStates, layers);
+		layers = performConversions(pState, pLevel, pPos, adjacent, adjStates, layers);
 		
+		if (layers>0) {
+			pLevel.setBlockAndUpdate(pPos, pState.setValue(LAYERS, layers));
+			pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
+		} else {
+			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+		}
+    }
+	
+	private int spread(BlockState pState, ServerWorld pLevel, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
+		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
+			BlockPos adjPos = adjacent[adjIdx];
+			BlockState adjState = adjStates[adjIdx];
+			if (layers<=1) { continue; }
+			if (adjIdx>3) { continue; }
+			
+			if (pLevel.isEmptyBlock(adjPos)) {
+				BlockState newState = pState.getBlock().defaultBlockState().setValue(LAYERS, 1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				tryFall(newState, pLevel, adjPos);
+				layers--;
+				continue;
+			}
+			
+			Block adjBlock = adjState.getBlock();
+			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
+					&& adjState.getValue(LAYERS)<layers-1) {
+				BlockState newState = adjState.setValue(LAYERS, adjState.getValue(LAYERS)+1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				tryFall(newState, pLevel, adjPos);
+				layers--;
+				continue;
+			}
+		}
+		
+		return layers;
+	}
+	
+	private int performConversions(BlockState pState, ServerWorld pLevel, BlockPos pPos, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
 		IBlockConversion currentPriorityConversion = null;
 		int conversionTargetAdjIdx = 0;
 		int currentPriority = -1;
@@ -115,50 +157,7 @@ public class RawNaniteGooBlock extends Block {
 			layers--;
 		}
 		
-		if (layers>0) {
-			pLevel.setBlockAndUpdate(pPos, pState.setValue(LAYERS, layers));
-			pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
-			// pLevel.notifyNeighborsOfStateChange(pPos, this, false);
-		} else {
-			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
-		}
-    }
-	
-	/**
-	 * 
-	 * @param pState
-	 * @param pLevel
-	 * @param adjacent
-	 * @param adjStates Array of adjacent BlockStates - is populated by method.
-	 */
-	private void spread(BlockState pState, ServerWorld pLevel, BlockPos[] adjacent, BlockState[] adjStates) {
-		int layers = pState.getValue(LAYERS);
-		
-		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
-			BlockPos adjPos = adjacent[adjIdx];
-			BlockState adjState = pLevel.getBlockState(adjPos);
-			adjStates[adjIdx] = adjState;
-			if (layers<=1) { continue; }
-			if (adjIdx>3) { continue; }
-			
-			if (pLevel.isEmptyBlock(adjPos)) {
-				BlockState newState = pState.getBlock().defaultBlockState().setValue(LAYERS, 1);
-				pLevel.setBlockAndUpdate(adjPos, newState);
-				tryFall(newState, pLevel, adjPos);
-				layers--;
-				continue;
-			}
-			
-			Block adjBlock = adjState.getBlock();
-			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
-					&& adjState.getValue(LAYERS)<layers-1) {
-				BlockState newState = adjState.setValue(LAYERS, adjState.getValue(LAYERS)+1);
-				pLevel.setBlockAndUpdate(adjPos, newState);
-				tryFall(newState, pLevel, adjPos);
-				layers--;
-				continue;
-			}
-		}
+		return layers;
 	}
 	
 	private Tuple<BlockPos, BlockState> tryFall(BlockState state, ServerWorld worldIn, BlockPos pos) {
