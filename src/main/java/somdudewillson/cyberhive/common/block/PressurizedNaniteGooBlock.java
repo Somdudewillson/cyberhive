@@ -56,28 +56,9 @@ public class PressurizedNaniteGooBlock extends Block {
 			return;
 		}
 		
-		BlockPos[] adjacent = new BlockPos[] {pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above()};
 		int density = pState.getValue(DENSITY);
-		for (int adjIdx=0;adjIdx<adjacent.length && density>0;adjIdx++) {
-			BlockPos adjPos = adjacent[adjIdx];
-			
-			if (pLevel.isEmptyBlock(adjPos)) {
-				BlockState newState = CyberBlocks.RAW_NANITE_GOO.defaultBlockState()
-						.setValue(RawNaniteGooBlock.LAYERS, 1);
-				pLevel.setBlockAndUpdate(adjPos, newState);
-				if (pRand.nextInt(16)==0) {density--;}
-				continue;
-			}
-			BlockState adjState = pLevel.getBlockState(adjPos);
-			if (adjState.getBlock() == CyberBlocks.RAW_NANITE_GOO
-					&& adjState.getValue(RawNaniteGooBlock.LAYERS)<RawNaniteGooBlock.MAX_HEIGHT) {
-				BlockState newState = adjState.setValue(
-						RawNaniteGooBlock.LAYERS,
-						adjState.getValue(RawNaniteGooBlock.LAYERS)+1);
-				pLevel.setBlockAndUpdate(adjPos, newState);
-				if (pRand.nextInt(16)==0) {density--;}
-			}
-		}
+		density = spread(pLevel, pPos, pRand, density);
+		
 		if (density>0) {
 			pLevel.setBlockAndUpdate(pPos, pState.setValue(DENSITY, density));
 			pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
@@ -104,6 +85,33 @@ public class PressurizedNaniteGooBlock extends Block {
 		}
 		
 		return false;
+	}
+	
+	private int spread(ServerWorld pLevel, BlockPos pPos, Random pRand, int density) {
+		BlockPos[] adjacent = new BlockPos[] {pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above()};
+		
+		for (int adjIdx=0;adjIdx<adjacent.length && density>0;adjIdx++) {
+			BlockPos adjPos = adjacent[adjIdx];
+			
+			if (pLevel.isEmptyBlock(adjPos)) {
+				BlockState newState = CyberBlocks.RAW_NANITE_GOO.defaultBlockState()
+						.setValue(RawNaniteGooBlock.LAYERS, 1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				if (pRand.nextInt(16)==0) {density--;}
+				continue;
+			}
+			BlockState adjState = pLevel.getBlockState(adjPos);
+			if (adjState.getBlock() == CyberBlocks.RAW_NANITE_GOO
+					&& adjState.getValue(RawNaniteGooBlock.LAYERS)<RawNaniteGooBlock.MAX_HEIGHT) {
+				BlockState newState = adjState.setValue(
+						RawNaniteGooBlock.LAYERS,
+						adjState.getValue(RawNaniteGooBlock.LAYERS)+1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				if (pRand.nextInt(16)==0) {density--;}
+			}
+		}
+		
+		return density;
 	}
 
 	@Override
