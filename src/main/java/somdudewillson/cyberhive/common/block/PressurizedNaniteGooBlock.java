@@ -7,13 +7,18 @@ import java.util.Random;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import somdudewillson.cyberhive.common.CyberBlocks;
@@ -47,7 +52,11 @@ public class PressurizedNaniteGooBlock extends Block {
 		if (pLevel.isClientSide) { return; } 
 		if (!pLevel.isLoaded(pPos)) { return; } // Prevent loading unloaded chunks with block update
 		
-		BlockPos[] adjacent = new BlockPos[] {pPos.below(),pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above()};
+		if (tryFall(pState, pLevel, pPos)) {
+			return;
+		}
+		
+		BlockPos[] adjacent = new BlockPos[] {pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above()};
 		int density = pState.getValue(DENSITY);
 		for (int adjIdx=0;adjIdx<adjacent.length && density>0;adjIdx++) {
 			BlockPos adjPos = adjacent[adjIdx];
@@ -79,6 +88,24 @@ public class PressurizedNaniteGooBlock extends Block {
 		}
     }
 	
+	private boolean tryFall(BlockState pState, ServerWorld pLevel, BlockPos pPos) {
+		BlockState belowBlockState = pLevel.getBlockState(pPos.below());
+		Block belowBlock = belowBlockState.getBlock();
+		
+		if (belowBlock == CyberBlocks.RAW_NANITE_GOO) {
+			pLevel.setBlockAndUpdate(pPos.below(), pState);
+			pLevel.setBlockAndUpdate(pPos, belowBlockState);
+			return true;
+		}
+		if (belowBlockState.canBeReplaced(new BlockItemUseContext(pLevel, null, null, ItemStack.EMPTY, new BlockRayTraceResult(Vector3d.ZERO, Direction.UP, pPos, false)))) {
+			pLevel.setBlockAndUpdate(pPos.below(), pState);
+			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+			return true;
+		}
+		
+		return false;
+	}
+
 	@Override
 	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
 		pBuilder.add(DENSITY);
