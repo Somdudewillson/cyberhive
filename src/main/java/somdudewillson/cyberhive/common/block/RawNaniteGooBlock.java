@@ -1,143 +1,106 @@
 package somdudewillson.cyberhive.common.block;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
-import javax.annotation.Nullable;
-
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.Item;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import somdudewillson.cyberhive.CyberhiveMod;
+import net.minecraft.world.server.ServerWorld;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
 import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
-import somdudewillson.cyberhive.common.creativetab.TabCyberHive;
 
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
-	public static final PropertyInteger LAYERS = PropertyInteger.create("layers", 1, MAX_HEIGHT);
-	protected static final AxisAlignedBB[] SHAPE_BY_LAYER = new AxisAlignedBB[] {new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D)};
+	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, MAX_HEIGHT);
+	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {VoxelShapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D), Block.box(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D)};
 	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() };
 	
 	public RawNaniteGooBlock() {
-		super(Material.IRON);
+		super(AbstractBlock.Properties.of(Material.METAL).strength(2.0F, 3.0F).sound(SoundType.SLIME_BLOCK));
 
 		setRegistryName("raw_nanite_goo");
-		setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
-		setSoundType(SoundType.SLIME);
-		setCreativeTab(TabCyberHive.CYBERHIVE_TAB);
-        setDefaultState(this.blockState.getBaseState().withProperty(LAYERS, Integer.valueOf(MAX_HEIGHT)));
+		// setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
+		registerDefaultState(this.defaultBlockState().setValue(LAYERS, Integer.valueOf(MAX_HEIGHT)));
 	}
 	
-	@Override
 	public int tickRate(World worldIn) {
 		return 20;
 	}
 
 	@Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return SHAPE_BY_LAYER[((Integer)state.getValue(LAYERS)).intValue()];
-    }
+	public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
+		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
+	}
+	@Override
+	public VoxelShape getCollisionShape(BlockState pState, IBlockReader pLevel, BlockPos pPos,
+			ISelectionContext pContext) {
+		return SHAPE_BY_LAYER[pState.getValue(LAYERS) - 1];
+	}
+	@Override
+	public VoxelShape getBlockSupportShape(BlockState pState, IBlockReader pReader, BlockPos pPos) {
+		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
+	}
+	@Override
+	public VoxelShape getVisualShape(BlockState pState, IBlockReader pReader, BlockPos pPos,
+			ISelectionContext pContext) {
+		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
+	}
+	@Override
+	public boolean useShapeForLightOcclusion(BlockState pState) {
+		return true;
+	}
     
-	@Override
-    public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
-        return true;
+    @Override
+    public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+    	LinkedList<ItemStack> dropList = new LinkedList<ItemStack>();
+    	dropList.add(new ItemStack(CyberItems.NANITE_LUMP, pState.getValue(LAYERS)));
+    	return dropList;
     }
 
 	@Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
+    public void tick(BlockState pState, ServerWorld pLevel, BlockPos pPos, Random pRand) {
+		if (pLevel.isClientSide) { return; } 
+		if (!pLevel.isLoaded(pPos)) { return; } // Prevent loading unloaded chunks with block update
 
-	@Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
-        return face == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
-    }
-
-    @Nullable
-	@Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
-    {
-        int i = ((Integer)blockState.getValue(LAYERS)).intValue() - 1;
-        float f = 1f/MAX_HEIGHT;
-        AxisAlignedBB axisalignedbb = blockState.getBoundingBox(worldIn, pos);
-        return new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.maxX, (double)((float)i * f), axisalignedbb.maxZ);
-    }
-
-    public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return CyberItems.NANITE_LUMP;
-    }
-
-    public int quantityDropped(Random rng) {
-        return 1;
-    }
-
-	@Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rng) {
-		if (worldIn.isRemote) { return; } 
-		if (!worldIn.isBlockLoaded(pos)) { return; } // Prevent loading unloaded chunks with block update
-
-		Tuple<BlockPos,IBlockState> newTarget = tryFall(state, worldIn, pos);		
-		pos = newTarget.getFirst();
-		state = newTarget.getSecond();
+		Tuple<BlockPos, BlockState> newTarget = tryFall(pState, pLevel, pPos);		
+		pPos = newTarget.getA();
+		pState = newTarget.getB();
 		
-		BlockPos[] adjacent = new BlockPos[] {pos.north(),pos.east(),pos.south(),pos.west(),pos.up(),pos.down()};
-		IBlockState[] adjStates = new IBlockState[adjacent.length];
-		int layers = state.getValue(LAYERS);
-		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
-			BlockPos adjPos = adjacent[adjIdx];
-			IBlockState adjState = worldIn.getBlockState(adjPos);
-			adjStates[adjIdx] = adjState;
-			if (layers<=1) { continue; }
-			if (adjIdx>3) { continue; }
-			
-			if (worldIn.isAirBlock(adjPos)) {
-				IBlockState newState = state.getBlock().getDefaultState().withProperty(LAYERS, 1);
-				worldIn.setBlockState(adjPos, newState);
-				tryFall(newState, worldIn, adjPos);
-				layers--;
-				continue;
-			}
-			
-			Block adjBlock = adjState.getBlock();
-			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
-					&& adjState.getValue(LAYERS)<layers-1) {
-				IBlockState newState = adjState.withProperty(LAYERS, adjState.getValue(LAYERS)+1);
-				worldIn.setBlockState(adjPos, newState);
-				tryFall(newState, worldIn, adjPos);
-				layers--;
-				continue;
-			}
-		}
+		final BlockPos[] adjacent = new BlockPos[] {pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above(),pPos.below()};
+		BlockState[] adjStates = new BlockState[adjacent.length];
+		spread(pState, pLevel, adjacent, adjStates);
+		
+		int layers = pState.getValue(LAYERS);
 		
 		IBlockConversion currentPriorityConversion = null;
 		int conversionTargetAdjIdx = 0;
 		int currentPriority = -1;
 		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
 			BlockPos adjPos = adjacent[adjIdx];
-			IBlockState adjState = adjStates[adjIdx];
+			BlockState adjState = adjStates[adjIdx];
 			
 			for (IBlockConversion conversion : blockConversions) {
 				int priority = conversion.getPriority();
 				
-				if (priority>=currentPriority && conversion.validTarget(adjPos, adjState, worldIn)) {
+				if (priority>=currentPriority && conversion.validTarget(adjPos, adjState, pLevel)) {
 					currentPriorityConversion = conversion;
 					conversionTargetAdjIdx = adjIdx;
 					currentPriority = priority;
@@ -148,85 +111,110 @@ public class RawNaniteGooBlock extends Block {
 			currentPriorityConversion.doConversion(
 					adjacent[conversionTargetAdjIdx],
 					adjStates[conversionTargetAdjIdx],
-					worldIn);
+					pLevel);
 			layers--;
 		}
 		
 		if (layers>0) {
-			worldIn.setBlockState(pos, state.withProperty(LAYERS, layers));
-            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
-            worldIn.notifyNeighborsOfStateChange(pos, this, false);
+			pLevel.setBlockAndUpdate(pPos, pState.setValue(LAYERS, layers));
+			pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
+			// pLevel.notifyNeighborsOfStateChange(pPos, this, false);
 		} else {
-			worldIn.setBlockToAir(pos);
+			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
 		}
     }
 	
-	private Tuple<BlockPos,IBlockState> tryFall(IBlockState state, World worldIn, BlockPos pos) {
-		Tuple<BlockPos,IBlockState> result = new Tuple<BlockPos,IBlockState>(pos,state);
+	/**
+	 * 
+	 * @param pState
+	 * @param pLevel
+	 * @param adjacent
+	 * @param adjStates Array of adjacent BlockStates - is populated by method.
+	 */
+	private void spread(BlockState pState, ServerWorld pLevel, BlockPos[] adjacent, BlockState[] adjStates) {
+		int layers = pState.getValue(LAYERS);
+		
+		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
+			BlockPos adjPos = adjacent[adjIdx];
+			BlockState adjState = pLevel.getBlockState(adjPos);
+			adjStates[adjIdx] = adjState;
+			if (layers<=1) { continue; }
+			if (adjIdx>3) { continue; }
+			
+			if (pLevel.isEmptyBlock(adjPos)) {
+				BlockState newState = pState.getBlock().defaultBlockState().setValue(LAYERS, 1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				tryFall(newState, pLevel, adjPos);
+				layers--;
+				continue;
+			}
+			
+			Block adjBlock = adjState.getBlock();
+			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
+					&& adjState.getValue(LAYERS)<layers-1) {
+				BlockState newState = adjState.setValue(LAYERS, adjState.getValue(LAYERS)+1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				tryFall(newState, pLevel, adjPos);
+				layers--;
+				continue;
+			}
+		}
+	}
+	
+	private Tuple<BlockPos, BlockState> tryFall(BlockState state, ServerWorld worldIn, BlockPos pos) {
+		Tuple<BlockPos, BlockState> result = new Tuple<BlockPos, BlockState>(pos,state);
 		
 		boolean keepFalling = false;
 		do {
 			keepFalling = false;
-			pos = result.getFirst();
-			state = result.getSecond();
+			pos = result.getA();
+			state = result.getB();
 			
-			BlockPos fallPos = pos.down();
-			if (worldIn.isAirBlock(fallPos)) {
-				worldIn.setBlockState(fallPos, state);
-				worldIn.setBlockToAir(pos);
+			BlockPos fallPos = pos.below();
+			if (worldIn.isEmptyBlock(fallPos)) {
+				worldIn.setBlockAndUpdate(fallPos, state);
+				worldIn.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 				
-				result = new Tuple<BlockPos,IBlockState>(fallPos, state);
+				result = new Tuple<BlockPos, BlockState>(fallPos, state);
 				keepFalling = true;
 				continue;
 			}
 			
-			IBlockState fallState = worldIn.getBlockState(fallPos);
+			BlockState fallState = worldIn.getBlockState(fallPos);
 			if (fallState.getBlock() == CyberBlocks.RAW_NANITE_GOO
 					&& fallState.getValue(LAYERS)<MAX_HEIGHT) {
 				int targetLayers = fallState.getValue(LAYERS);
 				int ownLayers = state.getValue(LAYERS);
 				int availableSpace = MAX_HEIGHT-targetLayers;
 				
-				IBlockState newState;
+				BlockState newState;
 				if (availableSpace>=ownLayers) {
-					newState = fallState.withProperty(LAYERS, targetLayers+ownLayers);
-					worldIn.setBlockState(fallPos, fallState.withProperty(LAYERS, targetLayers+ownLayers));
-					worldIn.setBlockToAir(pos);
+					newState = fallState.setValue(LAYERS, targetLayers+ownLayers);
+					worldIn.setBlockAndUpdate(fallPos, fallState.setValue(LAYERS, targetLayers+ownLayers));
+					worldIn.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 					
-					result = new Tuple<BlockPos,IBlockState>(fallPos,newState);
+					result = new Tuple<BlockPos, BlockState>(fallPos,newState);
 				} else {
-					worldIn.setBlockState(fallPos, fallState.withProperty(LAYERS, MAX_HEIGHT));
-					newState = state.withProperty(LAYERS, ownLayers-availableSpace);
-					worldIn.setBlockState(pos, newState);
+					worldIn.setBlockAndUpdate(fallPos, fallState.setValue(LAYERS, MAX_HEIGHT));
+					newState = state.setValue(LAYERS, ownLayers-availableSpace);
+					worldIn.setBlockAndUpdate(pos, newState);
 					
-					result = new Tuple<BlockPos,IBlockState>(pos,newState);
+					result = new Tuple<BlockPos, BlockState>(pos,newState);
 				}
 			}
 		} while (keepFalling);
 		
 		return result;
 	}
-
+	
 	@Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(LAYERS, Integer.valueOf((meta & (MAX_HEIGHT-1)) + 1));
-    }
-
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Integer)state.getValue(LAYERS)).intValue() - 1;
-    }
-
-    @Override public int quantityDropped(IBlockState state, int fortune, Random rng) {
-    	return ((Integer)state.getValue(LAYERS)) + 1;
-    }
-
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[] {LAYERS});
-    }
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
+		pBuilder.add(LAYERS);
+	}
     
     @Override
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-    	worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+    public void onPlace(BlockState pState, World pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+    	if (pLevel.isClientSide) { return; }
+    	pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
     }
 }

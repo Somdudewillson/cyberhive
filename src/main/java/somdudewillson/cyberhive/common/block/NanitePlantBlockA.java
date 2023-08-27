@@ -1,37 +1,25 @@
 package somdudewillson.cyberhive.common.block;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import somdudewillson.cyberhive.CyberhiveMod;
-import somdudewillson.cyberhive.common.creativetab.TabCyberHive;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.state.StateContainer;
 
 public class NanitePlantBlockA extends Block {
 	public NanitePlantBlockA() {
-		super(Material.IRON);
+		super(AbstractBlock.Properties.of(Material.METAL, MaterialColor.WOOD).strength(2.0F, 3.0F).sound(SoundType.WOOD));
 
 		setRegistryName("nanite_plant_a");
-		setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
-		setSoundType(SoundType.WOOD);
-		setCreativeTab(TabCyberHive.CYBERHIVE_TAB);
-        setDefaultState(this.blockState.getBaseState()
-        		.withProperty(NanitePlantCoreBlock.CORE_DIR, Integer.valueOf(0)));
+		// setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
+		registerDefaultState(this.defaultBlockState()
+        		.setValue(NanitePlantCoreBlock.CORE_DIR, Integer.valueOf(0)));
 	}
-
+	
 	@Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(NanitePlantCoreBlock.CORE_DIR, Integer.valueOf(meta));
-    }
-
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((Integer)state.getValue(NanitePlantCoreBlock.CORE_DIR)).intValue();
-    }
-
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[] {NanitePlantCoreBlock.CORE_DIR});
-    }
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
+		pBuilder.add(NanitePlantCoreBlock.CORE_DIR);
+	}
 }

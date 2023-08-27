@@ -1,24 +1,23 @@
 package somdudewillson.cyberhive.common.tileentity;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.OreDictionary;
-import scala.actors.threadpool.Arrays;
+import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockA;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockB;
-import somdudewillson.cyberhive.common.utils.OreDictUtils;
 
-public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
-    public static final NonNullList<ItemStack> logsWood = OreDictionary.getOres("logWood");
+public class NanitePlantCoreTileEntity extends TileEntity implements ITickableTileEntity {
+    public static final List<Block> logsWood = BlockTags.LOGS.getValues();
     
 	private int tickOffset;
 	
@@ -32,79 +31,78 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
 	private byte[] growthData = new byte[26];
 	
 	public NanitePlantCoreTileEntity() {
-		super();
+		super(CyberBlocks.NANITE_PLANT_CORE_TET);
 		
 		Arrays.fill(growthData, Byte.MIN_VALUE);
-		this.markDirty();
+		this.setChanged();
 	}
 	
 	@Override
     public void onLoad() {
-		tickOffset = this.getPos().hashCode();
+		tickOffset = this.getBlockPos().hashCode();
     }
 
 	@Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
+    public void load(BlockState state, CompoundNBT compound) {
+        super.load(state, compound);
         
         age = compound.getShort(ageKey);
-        energy = compound.getInteger(energyKey);
+        energy = compound.getInt(energyKey);
         level = compound.getByte(levelKey);
         growthData = compound.getByteArray(growthKey);
     }
 
 	@Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound = super.writeToNBT(compound);
+    public CompoundNBT save(CompoundNBT pCompound) {
+		pCompound = super.save(pCompound);
         
-        compound.setShort(ageKey, age);
-        compound.setInteger(energyKey, energy);
-        compound.setByte(levelKey, level);
-        compound.setByteArray(growthKey, growthData);
+		pCompound.putShort(ageKey, age);
+		pCompound.putInt(energyKey, energy);
+		pCompound.putByte(levelKey, level);
+		pCompound.putByteArray(growthKey, growthData);
         
-        return compound;
+        return pCompound;
     }
 
 	@Override
-	public void update() {
-		if (world.isRemote) { return; }
-		if ((world.getTotalWorldTime()+tickOffset & 31) != 0) { return; }
+	public void tick() {
+		if (super.level.isClientSide()) { return; }
+		if ((super.level.getGameTime()+tickOffset & 31) != 0) { return; }
 		
 		age++;
 		energy++;
 		
 		if (energy>=15) {
-			expansionPulse(world);
+			expansionPulse(super.level);
 			energy-=15;
 		}
 		
-		this.markDirty();
+		this.setChanged();
 	}
 	
 	private void expansionPulse(World worldIn) {
-		BlockPos[] adjacents = getDiagAdjPosArray(pos);
+		BlockPos[] adjacents = getDiagAdjPosArray(worldPosition);
 		for (BlockPos adj : adjacents) {
-			IBlockState adjState = worldIn.getBlockState(adj);
+			BlockState adjState = worldIn.getBlockState(adj);
 			if (isLoglike(adjState,adj,worldIn) || isNaniteStem(adjState)) {
-				NanitePlantGrowerTileEntity.grow(worldIn, pos, adj, pos, (byte)(Byte.MIN_VALUE+3), growthData);
+				NanitePlantGrowerTileEntity.grow(worldIn, worldPosition, adj, worldPosition, (byte)(Byte.MIN_VALUE+3), growthData);
 			}
 		}
 	}
 	
-	public static boolean isLoglike(IBlockState state, BlockPos pos, World worldIn) {
-		ItemStack blockItem = state.getBlock().getPickBlock(state, null, worldIn, pos, null);
-		return OreDictUtils.matchesAny(false, logsWood, blockItem);
+	public static boolean isLoglike(BlockState state, BlockPos pos, World worldIn) {
+		return BlockTags.LOGS.contains(state.getBlock());
 	}
-	public static boolean isNaniteStem(IBlockState state) {
+	public static boolean isNaniteStem(BlockState state) {
 		return (state.getBlock() instanceof NanitePlantBlockA) || (state.getBlock() instanceof NanitePlantBlockB);
 	}
 	private static BlockPos[] diagonalOffsets = 
-			StreamSupport.stream(BlockPos.getAllInBox(-1, -1, -1, 1, 1, 1).spliterator(),false)
-			.filter(pos->!pos.equals(BlockPos.ORIGIN))
+			BlockPos.betweenClosedStream(-1, -1, -1, 1, 1, 1)
+			.filter(pos->!pos.equals(BlockPos.ZERO))
 			.toArray(BlockPos[]::new);
 	public static BlockPos[] getDiagAdjPosArray(final BlockPos center) {
 		return Stream.of(diagonalOffsets)
-				.map(pos->center.add(pos))
+				.map(pos->center.offset(pos))
 				.toArray(BlockPos[]::new);
 	}
 	
@@ -116,7 +114,7 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickable {
 		}
 		
 		growthData[newDir]++;
-		this.markDirty();
+		this.setChanged();
 	}
 
 }

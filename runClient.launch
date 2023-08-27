@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/cyberhive"/>
-</listAttribute>
-<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="4"/>
-</listAttribute>
-<mapAttribute key="org.eclipse.debug.core.environmentVariables">
-<mapEntry key="FORGE_GROUP" value="net.minecraftforge"/>
-<mapEntry key="FORGE_VERSION" value="14.23.5.2855"/>
-<mapEntry key="MCP_MAPPINGS" value="snapshot_20171003-1.12"/>
-<mapEntry key="MCP_TO_SRG" value="D:\Ashan-Programs\MCreatorEclipse\cyberhive\build\createSrgToMcp\output.srg"/>
-<mapEntry key="MC_VERSION" value="1.12"/>
-<mapEntry key="MOD_CLASSES" value="examplemod%%D:\Ashan-Programs\MCreatorEclipse\cyberhive\bin\main;examplemod%%D:\Ashan-Programs\MCreatorEclipse\cyberhive\bin\main"/>
-<mapEntry key="assetDirectory" value="C:\Users\Kids\.gradle\caches\forge_gradle\assets"/>
-<mapEntry key="assetIndex" value="1.12"/>
-<mapEntry key="mainClass" value="net.minecraft.launchwrapper.Launch"/>
-<mapEntry key="nativesDirectory" value="D:\Ashan-Programs\MCreatorEclipse\cyberhive\build\natives"/>
-<mapEntry key="tweakClass" value="net.minecraftforge.fml.common.launcher.FMLTweaker"/>
-</mapAttribute>
-<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
-<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
-<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
-</listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.buildship.core.classpathprovider"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.minecraftforge.legacydev.MainClient"/>
-<stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="cyberhive"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cyberhive"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dforge.logging.console.level=debug -Dforge.logging.markers=REGISTRIES"/>
-<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="D:\Ashan-Programs\MCreatorEclipse\cyberhive\run"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/cyberhive"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="4"/>
+    </listAttribute>
+    <mapAttribute key="org.eclipse.debug.core.environmentVariables">
+        <mapEntry key="FORGE_GROUP" value="net.minecraftforge"/>
+        <mapEntry key="FORGE_VERSION" value="36.2.34"/>
+        <mapEntry key="MCP_MAPPINGS" value="official_1.16.5"/>
+        <mapEntry key="MCP_VERSION" value="20210115.111550"/>
+        <mapEntry key="MC_VERSION" value="1.16.5"/>
+        <mapEntry key="MOD_CLASSES" value="cyberhive%%C:\Users\somdu\Programming-Workspaces\McModding\cyberhive\bin\main;cyberhive%%C:\Users\somdu\Programming-Workspaces\McModding\cyberhive\bin\main"/>
+        <mapEntry key="assetDirectory" value="C:\Users\somdu\.gradle\caches\forge_gradle\assets"/>
+        <mapEntry key="assetIndex" value="1.16"/>
+        <mapEntry key="nativesDirectory" value="C:\Users\somdu\Programming-Workspaces\McModding\cyberhive\build\natives"/>
+        <mapEntry key="target" value="fmluserdevclient"/>
+    </mapAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.minecraftforge.userdev.LaunchTesting"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="cyberhive"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cyberhive"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dforge.logging.console.level=debug -Dforge.logging.markers=REGISTRIES -XX:+IgnoreUnrecognizedVMOptions --add-exports=java.base/sun.security.util=ALL-UNNAMED --add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming --add-opens=java.base/java.util.jar=ALL-UNNAMED -XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump &quot;-Dos.name=Windows 10&quot; -Dos.version=10.0"/>
+    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="C:\Users\somdu\Programming-Workspaces\McModding\cyberhive\run"/>
 </launchConfiguration>

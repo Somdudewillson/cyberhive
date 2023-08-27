@@ -1,17 +1,23 @@
 package somdudewillson.cyberhive.common;
 
+import java.util.function.Supplier;
+
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import somdudewillson.cyberhive.CyberhiveMod;
-import somdudewillson.cyberhive.common.block.*;
+import somdudewillson.cyberhive.common.block.NaniteGrassBlock;
+import somdudewillson.cyberhive.common.block.NanitePlantBlockA;
+import somdudewillson.cyberhive.common.block.NanitePlantBlockB;
+import somdudewillson.cyberhive.common.block.NanitePlantCoreBlock;
+import somdudewillson.cyberhive.common.block.NanitePlantGrowerBlock;
+import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
+import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
+import somdudewillson.cyberhive.common.itemgroup.ItemGroupCyberHive;
 import somdudewillson.cyberhive.common.tileentity.NanitePlantCoreTileEntity;
 import somdudewillson.cyberhive.common.tileentity.NanitePlantGrowerTileEntity;
 
@@ -27,40 +33,59 @@ public class CyberBlocks {
 	public static final Block NANITE_PLANT_A = new NanitePlantBlockA();
 	public static final Block NANITE_PLANT_B = new NanitePlantBlockB();
 	
+	//Tile Entity Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	public static final TileEntityType<NanitePlantCoreTileEntity> NANITE_PLANT_CORE_TET = makeTileEntityType("nanite_plant_core_tiletype", NanitePlantCoreTileEntity::new, NANITE_PLANT_CORE);
+	public static final TileEntityType<NanitePlantGrowerTileEntity> NANITE_PLANT_GROWER_TET = makeTileEntityType("nanite_plant_grower_tiletype", NanitePlantGrowerTileEntity::new, NANITE_PLANT_GROWER);
+	
 	@SubscribeEvent
 	public void registerBlocks(RegistryEvent.Register<Block> event) {
 	    event.getRegistry().registerAll(RAW_NANITE_GOO, PRESSURIZED_NANITE_GOO,
 	    		NANITE_GRASS,
 	    		NANITE_PLANT_CORE, NANITE_PLANT_GROWER, NANITE_PLANT_A, NANITE_PLANT_B);
-	    
-	    GameRegistry.registerTileEntity(NanitePlantCoreTileEntity.class, new ResourceLocation(CyberhiveMod.MODID,"nanite_plant_core_tile"));
-	    GameRegistry.registerTileEntity(NanitePlantGrowerTileEntity.class, new ResourceLocation(CyberhiveMod.MODID,"nanite_plant_grower_tile"));
+        
+	    CyberhiveMod.LOGGER.debug("Registered blocks");
+	}
+	
+	@SubscribeEvent
+	public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
+	    event.getRegistry().registerAll(NANITE_PLANT_CORE_TET, NANITE_PLANT_GROWER_TET);
+        
+	    CyberhiveMod.LOGGER.debug("Registered tile entities");
 	}
 	
 	@SubscribeEvent
 	public void registerItemBlocks(RegistryEvent.Register<Item> event) {
-		event.getRegistry().registerAll(new ItemBlock(RAW_NANITE_GOO).setRegistryName(RAW_NANITE_GOO.getRegistryName()));
-		event.getRegistry().registerAll(new ItemBlock(PRESSURIZED_NANITE_GOO).setRegistryName(PRESSURIZED_NANITE_GOO.getRegistryName()));
-		event.getRegistry().registerAll(new ItemBlock(NANITE_GRASS).setRegistryName(NANITE_GRASS.getRegistryName()));
-		event.getRegistry().registerAll(new ItemBlock(NANITE_PLANT_CORE).setRegistryName(NANITE_PLANT_CORE.getRegistryName()));
-		event.getRegistry().registerAll(new ItemBlock(NANITE_PLANT_GROWER).setRegistryName(NANITE_PLANT_GROWER.getRegistryName()));
-		event.getRegistry().registerAll(new ItemBlock(NANITE_PLANT_A).setRegistryName(NANITE_PLANT_A.getRegistryName()));
-		event.getRegistry().registerAll(new ItemBlock(NANITE_PLANT_B).setRegistryName(NANITE_PLANT_B.getRegistryName()));
-		System.out.println("Registered ItemBlocks");
+		event.getRegistry().register(new BlockItem(RAW_NANITE_GOO, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(RAW_NANITE_GOO.getRegistryName()));
+		event.getRegistry().register(new BlockItem(PRESSURIZED_NANITE_GOO, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(PRESSURIZED_NANITE_GOO.getRegistryName()));
+		event.getRegistry().register(new BlockItem(NANITE_GRASS, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_GRASS.getRegistryName()));
+		event.getRegistry().register(new BlockItem(NANITE_PLANT_CORE, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_CORE.getRegistryName()));
+		event.getRegistry().register(new BlockItem(NANITE_PLANT_GROWER, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_GROWER.getRegistryName()));
+		event.getRegistry().register(new BlockItem(NANITE_PLANT_A, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_A.getRegistryName()));
+		event.getRegistry().register(new BlockItem(NANITE_PLANT_B, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_B.getRegistryName()));
+		
+		CyberhiveMod.LOGGER.debug("Registered ItemBlocks");
 	}
 	
-	@SubscribeEvent
-	public void registerRenders(ModelRegistryEvent event) {
-		registerRender(Item.getItemFromBlock(RAW_NANITE_GOO));
-		registerRender(Item.getItemFromBlock(PRESSURIZED_NANITE_GOO));
-		registerRender(Item.getItemFromBlock(NANITE_GRASS));
-		registerRender(Item.getItemFromBlock(NANITE_PLANT_CORE));
-		registerRender(Item.getItemFromBlock(NANITE_PLANT_GROWER));
-		registerRender(Item.getItemFromBlock(NANITE_PLANT_A));
-		registerRender(Item.getItemFromBlock(NANITE_PLANT_B));
+	@SuppressWarnings("unchecked")
+	private static <T extends TileEntity> TileEntityType<T> makeTileEntityType(String registryName, Supplier<? extends T> tileEntitySupplier, Block...blocks) {
+		return (TileEntityType<T>) TileEntityType.Builder
+				.of(tileEntitySupplier, blocks)
+				.build(null)
+				.setRegistryName(registryName);
 	}
 	
-	public void registerRender(Item item) {
-		ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation( item.getRegistryName(), "inventory"));
-	}
+//	@SubscribeEvent
+//	public void registerRenders(ModelRegistryEvent event) {
+//		registerRender(RAW_NANITE_GOO.asItem());
+//		registerRender(PRESSURIZED_NANITE_GOO.asItem());
+//		registerRender(NANITE_GRASS.asItem());
+//		registerRender(NANITE_PLANT_CORE.asItem());
+//		registerRender(NANITE_PLANT_GROWER.asItem());
+//		registerRender(NANITE_PLANT_A.asItem());
+//		registerRender(NANITE_PLANT_B.asItem());
+//	}
+//	
+//	public void registerRender(Item item) {
+//		ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation( item.getRegistryName(), "inventory"));
+//	}
 }

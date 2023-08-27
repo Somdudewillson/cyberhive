@@ -1,5 +1,5 @@
 {
     "variants": {
-        "normal": { "model": "cyberhive:nanite_grass" }
+        "": { "model": "cyberhive:block/nanite_grass" }
     }
 }

@@ -1,19 +1,17 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[36,)"
 license="All Rights Reserved"
 
 [[mods]]
 modId="cyberhive"
 version="0.1.0"
 displayName="Cyber Hive"
-credits="Created using mod maker MCreator - https://mcreator.net/about"
-displayURL="https://mcreator.net"
 authors="Somdudewillson"
 
 [[dependencies.cyberhive]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.2]"
+    versionRange="[1.16.5,1.17)"
     ordering="NONE"
     side="BOTH"
 
