@@ -91,7 +91,7 @@ public class RawNaniteGooBlock extends Block {
 			.forEach(adjIdx->adjStates[adjIdx]=pLevel.getBlockState(adjacent[adjIdx]));
 		
 		int layers = pState.getValue(LAYERS);
-		layers = spread(pState, pLevel, adjacent, adjStates, layers);
+		layers = spread(pState, pLevel, pRand, adjacent, adjStates, layers);
 		layers = performConversions(pState, pLevel, pPos, adjacent, adjStates, layers);
 		
 		if (layers>0) {
@@ -102,7 +102,7 @@ public class RawNaniteGooBlock extends Block {
 		}
     }
 	
-	private int spread(BlockState pState, ServerWorld pLevel, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
+	private int spread(BlockState pState, ServerWorld pLevel, Random pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
 		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
 			BlockPos adjPos = adjacent[adjIdx];
 			BlockState adjState = adjStates[adjIdx];
@@ -118,13 +118,15 @@ public class RawNaniteGooBlock extends Block {
 			}
 			
 			Block adjBlock = adjState.getBlock();
-			if (adjBlock == CyberBlocks.RAW_NANITE_GOO
-					&& adjState.getValue(LAYERS)<layers-1) {
-				BlockState newState = adjState.setValue(LAYERS, adjState.getValue(LAYERS)+1);
-				pLevel.setBlockAndUpdate(adjPos, newState);
-				tryFall(newState, pLevel, adjPos);
-				layers--;
-				continue;
+			if (adjBlock == CyberBlocks.RAW_NANITE_GOO) {
+				int adjLayers = adjState.getValue(LAYERS);
+				if (adjLayers<8 && layers-adjLayers+pRand.nextInt(2)>1) {
+					BlockState newState = adjState.setValue(LAYERS, adjLayers+1);
+					pLevel.setBlockAndUpdate(adjPos, newState);
+					tryFall(newState, pLevel, adjPos);
+					layers--;
+					continue;
+				}
 			}
 		}
 		
