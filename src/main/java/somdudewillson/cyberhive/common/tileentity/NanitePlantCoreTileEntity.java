@@ -99,6 +99,7 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickableTi
 	private static BlockPos[] diagonalOffsets = 
 			BlockPos.betweenClosedStream(-1, -1, -1, 1, 1, 1)
 			.filter(pos->!pos.equals(BlockPos.ZERO))
+			.map(BlockPos::immutable)
 			.toArray(BlockPos[]::new);
 	public static BlockPos[] getDiagAdjPosArray(final BlockPos center) {
 		return Stream.of(diagonalOffsets)
