@@ -37,32 +37,32 @@ public class NanitePlantCoreBlock extends Block {
 	}
 	
 	public static final Vector3i[] CORE_DIR_TO_VECTOR = new Vector3i[] {
-			new Vector3i(-1,-1,-1),
-			new Vector3i(-1,-1,0),
-			new Vector3i(-1,-1,1),
-			new Vector3i(-1,0,-1),
-			new Vector3i(-1,0,0),
-			new Vector3i(-1,0,1),
-			new Vector3i(-1,1,-1),
-			new Vector3i(-1,1,0),
-			new Vector3i(-1,1,1),
-			new Vector3i(0,-1,-1),
-			new Vector3i(0,-1,0),
-			new Vector3i(0,-1,1),
-			new Vector3i(0,0,-1),
-			new Vector3i(0,0,1),
-			new Vector3i(0,1,-1),
-			new Vector3i(0,1,0),
-			new Vector3i(0,1,1),
-			new Vector3i(1,-1,-1),
-			new Vector3i(1,-1,0),
-			new Vector3i(1,-1,1),
-			new Vector3i(1,0,-1),
-			new Vector3i(1,0,0),
-			new Vector3i(1,0,1),
-			new Vector3i(1,1,-1),
-			new Vector3i(1,1,0),
-			new Vector3i(1,1,1)
+			new Vector3i(-1,-1,-1), // a0
+			new Vector3i(-1,-1,0),  // a1
+			new Vector3i(-1,-1,1),  // a2
+			new Vector3i(-1,0,-1),  // a3
+			new Vector3i(-1,0,0),   // a4
+			new Vector3i(-1,0,1),   // a5
+			new Vector3i(-1,1,-1),  // a6
+			new Vector3i(-1,1,0),   // a7
+			new Vector3i(-1,1,1),   // a8
+			new Vector3i(0,-1,-1),  // a9
+			new Vector3i(0,-1,0),   // a10
+			new Vector3i(0,-1,1),   // a11
+			new Vector3i(0,0,-1),   // a12
+			new Vector3i(0,0,1),    // a13
+			new Vector3i(0,1,-1),   // a14
+			new Vector3i(0,1,0),    // a15
+			new Vector3i(0,1,1),    // b0
+			new Vector3i(1,-1,-1),  // b1
+			new Vector3i(1,-1,0),   // b2
+			new Vector3i(1,-1,1),   // b3
+			new Vector3i(1,0,-1),   // b4
+			new Vector3i(1,0,0),    // b5
+			new Vector3i(1,0,1),    // b6
+			new Vector3i(1,1,-1),   // b7
+			new Vector3i(1,1,0),    // b8
+			new Vector3i(1,1,1)     // b9
 	};
 	public static final HashMap<Vector3i,Integer> VECTOR_TO_CORE_DIR = MappingUtils.arrayToInverseMap(CORE_DIR_TO_VECTOR);
 	public static Vector3i coreDirToVector(int coreDir) {
