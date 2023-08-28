@@ -181,6 +181,7 @@ public class RawNaniteGooBlock extends Block {
 		return layers;
 	}
 	
+	// TODO: Maybe add rotated model to create nanite goo "waterfalls"?
 	private Tuple<BlockPos, BlockState> tryFall(BlockState state, ServerWorld worldIn, BlockPos pos) {
 		Tuple<BlockPos, BlockState> result = new Tuple<BlockPos, BlockState>(pos,state);
 		
@@ -191,10 +192,10 @@ public class RawNaniteGooBlock extends Block {
 			state = result.getB();
 			
 			BlockPos fallPos = pos.below();
-			if (worldIn.isEmptyBlock(fallPos)) {
+			if (worldIn.isEmptyBlock(fallPos)) {				
 				worldIn.setBlockAndUpdate(fallPos, state);
 				worldIn.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-				
+
 				result = new Tuple<BlockPos, BlockState>(fallPos, state);
 				keepFalling = true;
 				continue;
@@ -222,6 +223,12 @@ public class RawNaniteGooBlock extends Block {
 					
 					result = new Tuple<BlockPos, BlockState>(pos,newState);
 				}
+				continue;
+			}
+			
+			if (fallState.getMaterial().isLiquid()
+					&& fallState.getFluidState() != null
+					&& fallState.getFluidState().isSource()) {
 				continue;
 			}
 			
