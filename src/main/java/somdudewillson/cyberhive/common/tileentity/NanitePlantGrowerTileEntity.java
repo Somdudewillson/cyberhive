@@ -26,7 +26,7 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 	private static String energyKey = "energy";
 	private byte energy = Byte.MIN_VALUE;
 	private static String growthKey = "growth_data";
-	private byte[] growthData = new byte[26];
+	private byte[] growthData = new byte[27];
 	
 	private final byte tickOffset;
 	
@@ -93,36 +93,60 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 	}
 	
 	private void expansionPulse() {
-		BlockPos[] adjacents = NanitePlantCoreTileEntity.getDiagAdjPosArray(worldPosition);
-		for (BlockPos adj : adjacents) {
-			if (worldPosition.offset(NanitePlantCoreBlock.coreDirToVector(spreadDir)).equals(adj)) {
-				continue;
-			}
-			BlockState adjState = level.getBlockState(adj);
-			
-			if (NanitePlantCoreTileEntity.isLoglike(adjState,adj,level)
-					|| NanitePlantCoreTileEntity.isNaniteStem(adjState)) {
-				if (grow(level, worldPosition, adj, originPos, energy, growthData)) {
-					updateOriginGrowthData(NanitePlantCoreBlock.VECTOR_TO_CORE_DIR.get(worldPosition.subtract(adj)).byteValue());
-				}
-			} else if (adjState.getBlock() == Blocks.AIR) {
-				float max = 10;
-				byte direction = NanitePlantCoreBlock.VECTOR_TO_CORE_DIR.get(worldPosition.subtract(adj)).byteValue();
-				for (byte val : growthData) { max = Math.max(max, val-Byte.MIN_VALUE); }
-				max *= 1.5;
-				
-				if (level.random.nextFloat() < ((growthData[direction]-Byte.MIN_VALUE)/max)) {
-					grow(level, worldPosition, adj, originPos, energy, growthData);
-				}
-			}
+		NanitePlantCoreTileEntity.forEachAdjacentBlockPosNoCornerCutting(worldPosition, this::expansionStep);
+	}
+	private boolean expansionStep(BlockPos adj) {
+		if (worldPosition.offset(NanitePlantCoreBlock.coreDirToVector(spreadDir)).equals(adj)) {
+			return false;
 		}
+		BlockState adjState = level.getBlockState(adj);
+		
+		if (NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(adjState,adj,level)) {
+			if (grow(level, worldPosition, spreadDir, adj, originPos, energy, growthData)) {
+				updateOriginGrowthData(
+						NanitePlantCoreBlock.VECTOR_TO_CORE_DIR.get(worldPosition.subtract(adj)).byteValue(),
+						 countAdjacentLogLikeOrNaniteStem(adj, level));
+				return true;
+			}
+		} else if (adjState.getBlock() == Blocks.AIR) {
+			// Potentially grow out into the air
+			float max = 64;
+			byte direction = NanitePlantCoreBlock.VECTOR_TO_CORE_DIR.get(worldPosition.subtract(adj)).byteValue();
+			for (byte val : growthData) { max = Math.max(max, val-Byte.MIN_VALUE); }
+			max *= 1.5;
+			
+			if (level.random.nextFloat() >= ((growthData[direction]-Byte.MIN_VALUE)/max)) {
+				return false;
+			}
+			if (level.random.nextFloat() < 1-((growthData[26]-Byte.MIN_VALUE)/max)
+					&& countAdjacentLogLikeOrNaniteStem(adj, level)>2) {
+				return false;
+			}
+			
+			return grow(level, worldPosition, spreadDir, adj, originPos, energy, growthData);
+		}
+		
+		return false;
 	}
 	
-	public static boolean grow(World worldIn, BlockPos pos, BlockPos adj, Vector3i originPos, byte energy, byte[] growthData) {
+	public static int countAdjacentLogLikeOrNaniteStem(BlockPos center, World worldIn) {
+		int adjLogs = 0;
+		adjLogs += NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(center.above(), worldIn)?1:0;
+		adjLogs += NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(center.below(), worldIn)?1:0;
+		adjLogs += NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(center.north(), worldIn)?1:0;
+		adjLogs += NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(center.east(), worldIn)?1:0;
+		adjLogs += NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(center.south(), worldIn)?1:0;
+		adjLogs += NanitePlantCoreTileEntity.isLoglikeOrNaniteStem(center.west(), worldIn)?1:0;
+		return adjLogs;
+	}
+	
+	public static boolean grow(World worldIn, BlockPos pos, byte ownSpreadDir, BlockPos adj, Vector3i originPos, byte energy, byte[] growthData) {
 		byte newEnergy = (byte)(energy-1);
-		byte newSpreadDir = NanitePlantCoreBlock.VECTOR_TO_CORE_DIR.get(pos.subtract(adj)).byteValue();
+		BlockPos newSpreadVec = pos.subtract(adj);
+		byte newSpreadDir = NanitePlantCoreBlock.VECTOR_TO_CORE_DIR.get(newSpreadVec).byteValue();
 		byte existingSpreadDir = -1;
 		BlockState targetState = worldIn.getBlockState(adj);
+		
 		if (targetState.getBlock() instanceof NanitePlantBlockA) {
 			existingSpreadDir = targetState.getValue(NanitePlantCoreBlock.CORE_DIR).byteValue();
 			newEnergy = energy;
@@ -148,13 +172,13 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 		return true;
 	}
 
-	private void updateOriginGrowthData(byte newDir) {
+	private void updateOriginGrowthData(byte newDir, int adjacentLogLikeOrNaniteStem) {
 		if (originPos == null) { return; }
 		
 		TileEntity originTile = level.getBlockEntity(new BlockPos(originPos));
 		if (!(originTile instanceof NanitePlantCoreTileEntity)) { return; }
 		
 		NanitePlantCoreTileEntity originCoreEntity = (NanitePlantCoreTileEntity) originTile;
-		originCoreEntity.updateStemGrowthData(newDir);
+		originCoreEntity.updateStemGrowthData(newDir, adjacentLogLikeOrNaniteStem);
 	}
 }
