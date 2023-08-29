@@ -13,7 +13,7 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.tileentity.NanitePlantCoreTileEntity;
-import somdudewillson.cyberhive.common.utils.MappingUtils;
+import somdudewillson.cyberhive.common.utils.GenericUtils;
 
 public class NanitePlantCoreBlock extends Block {
 	public static final IntegerProperty CORE_DIR = IntegerProperty.create("core_dir", 0, 15);
@@ -64,7 +64,7 @@ public class NanitePlantCoreBlock extends Block {
 			new Vector3i(1,1,0),    // b8
 			new Vector3i(1,1,1)     // b9
 	};
-	public static final HashMap<Vector3i,Integer> VECTOR_TO_CORE_DIR = MappingUtils.arrayToInverseMap(CORE_DIR_TO_VECTOR);
+	public static final HashMap<Vector3i,Integer> VECTOR_TO_CORE_DIR = GenericUtils.arrayToInverseMap(CORE_DIR_TO_VECTOR);
 	public static Vector3i coreDirToVector(int coreDir) {
 		return CORE_DIR_TO_VECTOR[coreDir];
 	}
