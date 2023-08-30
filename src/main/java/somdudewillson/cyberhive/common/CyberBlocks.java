@@ -15,6 +15,7 @@ import somdudewillson.cyberhive.common.block.NanitePlantBlockA;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockB;
 import somdudewillson.cyberhive.common.block.NanitePlantCoreBlock;
 import somdudewillson.cyberhive.common.block.NanitePlantGrowerBlock;
+import somdudewillson.cyberhive.common.block.NaniteRootBlock;
 import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 import somdudewillson.cyberhive.common.itemgroup.ItemGroupCyberHive;
@@ -32,6 +33,7 @@ public class CyberBlocks {
 	public static final Block NANITE_PLANT_GROWER = new NanitePlantGrowerBlock();
 	public static final Block NANITE_PLANT_A = new NanitePlantBlockA();
 	public static final Block NANITE_PLANT_B = new NanitePlantBlockB();
+	public static final Block NANITE_ROOT = new NaniteRootBlock();
 	
 	//Tile Entity Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public static final TileEntityType<NanitePlantCoreTileEntity> NANITE_PLANT_CORE_TET = makeTileEntityType("nanite_plant_core_tiletype", NanitePlantCoreTileEntity::new, NANITE_PLANT_CORE);
@@ -41,7 +43,7 @@ public class CyberBlocks {
 	public void registerBlocks(RegistryEvent.Register<Block> event) {
 	    event.getRegistry().registerAll(RAW_NANITE_GOO, PRESSURIZED_NANITE_GOO,
 	    		NANITE_GRASS,
-	    		NANITE_PLANT_CORE, NANITE_PLANT_GROWER, NANITE_PLANT_A, NANITE_PLANT_B);
+	    		NANITE_PLANT_CORE, NANITE_PLANT_GROWER, NANITE_PLANT_A, NANITE_PLANT_B, NANITE_ROOT);
         
 	    CyberhiveMod.LOGGER.debug("Registered blocks");
 	}
@@ -62,6 +64,7 @@ public class CyberBlocks {
 		event.getRegistry().register(new BlockItem(NANITE_PLANT_GROWER, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_GROWER.getRegistryName()));
 		event.getRegistry().register(new BlockItem(NANITE_PLANT_A, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_A.getRegistryName()));
 		event.getRegistry().register(new BlockItem(NANITE_PLANT_B, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_PLANT_B.getRegistryName()));
+		event.getRegistry().register(new BlockItem(NANITE_ROOT, (new Item.Properties()).tab(ItemGroupCyberHive.CYBERHIVE_GROUP)).setRegistryName(NANITE_ROOT.getRegistryName()));
 		
 		CyberhiveMod.LOGGER.debug("Registered ItemBlocks");
 	}
