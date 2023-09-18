@@ -11,11 +11,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import somdudewillson.cyberhive.common.CyberBlocks;
-import somdudewillson.cyberhive.common.block.NanitePlantGrowerBlock;
+import somdudewillson.cyberhive.common.block.NaniteRootBlock;
 import somdudewillson.cyberhive.common.block.NaniteStemBlock;
 import somdudewillson.cyberhive.common.nanitedatacloud.NanitePlantData;
 
-public class NanitePlantCoreTileEntity extends TileEntity implements ITickableTileEntity {
+public class NaniteRootTileEntity extends TileEntity implements ITickableTileEntity {
     public static final List<Block> logsWood = BlockTags.LOGS.getValues();
     
 	private int tickOffset;
@@ -29,8 +29,8 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickableTi
 	private static String growthKey = "growth_data";
 	private NanitePlantData growthData = new NanitePlantData();
 	
-	public NanitePlantCoreTileEntity() {
-		super(CyberBlocks.NANITE_PLANT_CORE_TET);
+	public NaniteRootTileEntity() {
+		super(CyberBlocks.NANITE_ROOT_TET);
 		
 		// Arrays.fill(growthData, Byte.MIN_VALUE);
 		// this.setChanged();
@@ -84,8 +84,7 @@ public class NanitePlantCoreTileEntity extends TileEntity implements ITickableTi
 		for (BlockPos adj : adjacents) {
 			BlockState adjState = worldIn.getBlockState(adj);
 			if (NaniteStemBlock.isLoglikeOrNaniteStem(adjState,adj,worldIn)) {
-				// TODO: Reference correct facing data 
-				NanitePlantGrowerTileEntity.grow(worldIn, worldPosition, adj, this.getBlockState().getValue(NanitePlantGrowerBlock.FACING), (byte)(Byte.MIN_VALUE+3), growthData);
+				NanitePlantGrowerTileEntity.grow(worldIn, worldPosition, adj, this.getBlockState().getValue(NaniteRootBlock.FACING), (byte)(Byte.MIN_VALUE+3), growthData);
 			}
 		}
 	}

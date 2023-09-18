@@ -7,7 +7,7 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockReader;
-import somdudewillson.cyberhive.common.tileentity.NanitePlantCoreTileEntity;
+import somdudewillson.cyberhive.common.tileentity.NaniteRootTileEntity;
 
 public class NanitePlantCoreBlock extends Block {
 	public NanitePlantCoreBlock() {
@@ -19,7 +19,7 @@ public class NanitePlantCoreBlock extends Block {
 
 	@Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new NanitePlantCoreTileEntity();
+        return new NaniteRootTileEntity();
     }
 	
 	@Override

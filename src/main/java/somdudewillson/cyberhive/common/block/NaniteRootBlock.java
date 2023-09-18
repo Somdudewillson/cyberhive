@@ -1,7 +1,5 @@
 package somdudewillson.cyberhive.common.block;
 
-import java.util.Random;
-
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,11 +12,13 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import somdudewillson.cyberhive.common.tileentity.NaniteRootTileEntity;
 
 public class NaniteRootBlock extends NaniteStemBlock {
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
@@ -33,23 +33,17 @@ public class NaniteRootBlock extends NaniteStemBlock {
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState pState) {
-		return pState.getValue(ATTACHED);
-	}
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        return new NaniteRootTileEntity();
+    }
+	
 	@Override
-   public void randomTick(BlockState pState, ServerWorld pLevel, BlockPos pPos, Random pRandom) {
-		if (pRandom.nextFloat()<=0.5) {
-			// NanitePlantGrowerTileEntity.grow(pLevel, pPos, NaniteStemBlock.VECTOR_TO_CORE_DIR.get(new Vector3i(0, 1, 0)).byteValue(), adj, worldPosition, (byte)(Byte.MIN_VALUE+3), growthData);
-		}
-	   }
+	public boolean hasTileEntity(BlockState state) {
+		return true;
+	}
 
 	private static final Direction[] ROOTING_ORDER = new Direction[] { Direction.DOWN, Direction.NORTH, Direction.EAST,
 			Direction.SOUTH, Direction.WEST, Direction.UP };
-	@Override
-	public void tick(BlockState pState, ServerWorld pLevel, BlockPos pPos, Random pRand) {
-		pLevel.setBlockAndUpdate(pPos, updateRooting(pLevel, pPos, pState));
-	}
-
 	private BlockState updateRooting(World pLevel, BlockPos pPos, BlockState pState) {
 		BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
