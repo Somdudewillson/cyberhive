@@ -5,7 +5,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.INBTSerializable;
 import somdudewillson.cyberhive.common.utils.GenericUtils;
 
-public abstract class AbstractNaniteData implements INBTSerializable<CompoundNBT> {
+public abstract class AbstractNaniteData implements INBTSerializable<CompoundNBT>, Cloneable {
 	protected int prevRadiusWeight = -1;
 	protected int nextRadiusWeight = nextRadiusThreshold();
 	
@@ -40,6 +40,14 @@ public abstract class AbstractNaniteData implements INBTSerializable<CompoundNBT
 	public abstract void mutate();
 	public void mutate(int timeSteps) {
 		for (int i = 0; i < timeSteps; i++) { this.mutate(); }
+	}
+	
+	public AbstractNaniteData clone() {
+		try {
+			return (AbstractNaniteData) super.clone();
+		} catch (CloneNotSupportedException e) { }
+		
+		return null;
 	}
 
 	protected int calcRadiusThreshold(int testR) {

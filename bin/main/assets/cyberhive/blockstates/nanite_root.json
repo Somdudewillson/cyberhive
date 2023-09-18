@@ -1,0 +1,54 @@
+{
+  "variants": {
+    "facing=up,attached=false": {
+      "model": "cyberhive:block/nanite_root_detached"
+    },
+    "facing=down,attached=false": {
+      "model": "cyberhive:block/nanite_root_detached",
+      "x": 180
+    },
+    "facing=north,attached=false": {
+      "model": "cyberhive:block/nanite_root_detached",
+      "x": 90
+    },
+    "facing=south,attached=false": {
+      "model": "cyberhive:block/nanite_root_detached",
+      "x": 270
+    },
+    "facing=east,attached=false": {
+      "model": "cyberhive:block/nanite_root_detached",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,attached=false": {
+      "model": "cyberhive:block/nanite_root_detached",
+      "x": 90,
+      "y": 270
+    },
+    "facing=up,attached=true": {
+      "model": "cyberhive:block/nanite_root_attached"
+    },
+    "facing=down,attached=true": {
+      "model": "cyberhive:block/nanite_root_attached",
+      "x": 180
+    },
+    "facing=north,attached=true": {
+      "model": "cyberhive:block/nanite_root_attached",
+      "x": 90
+    },
+    "facing=south,attached=true": {
+      "model": "cyberhive:block/nanite_root_attached",
+      "x": 270
+    },
+    "facing=east,attached=true": {
+      "model": "cyberhive:block/nanite_root_attached",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,attached=true": {
+      "model": "cyberhive:block/nanite_root_attached",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

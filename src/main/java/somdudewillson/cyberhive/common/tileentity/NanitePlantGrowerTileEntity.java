@@ -1,76 +1,84 @@
 package somdudewillson.cyberhive.common.tileentity;
 
-import java.util.Arrays;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockA;
 import somdudewillson.cyberhive.common.block.NanitePlantBlockB;
+import somdudewillson.cyberhive.common.block.NanitePlantGrowerBlock;
+import somdudewillson.cyberhive.common.block.NaniteRootBlock;
 import somdudewillson.cyberhive.common.block.NaniteStemBlock;
+import somdudewillson.cyberhive.common.nanitedatacloud.NanitePlantData;
+import somdudewillson.cyberhive.common.nanitedatacloud.NanitePlantData.PlantDataField;
 
 public class NanitePlantGrowerTileEntity extends TileEntity implements ITickableTileEntity {
 	
-	private static String originKey = "origin_pos";
-	private Vector3i originPos = null;
-	private static String spreadKey = "spread";
-	private boolean spread = false;
+	private static String originKey = "origin_dir";
+	private Direction originDir = Direction.UP;
+	private static String spreadKey = "hasSpread";
+	private boolean hasSpread = false;
 	private static String spreadDirKey = "spread_dir";
 	private byte spreadDir = NaniteStemBlock.VECTOR_TO_CORE_DIR.get(new Vector3i(0,-1,0)).byteValue();
 	private static String energyKey = "energy";
 	private byte energy = Byte.MIN_VALUE;
 	private static String growthKey = "growth_data";
-	private byte[] growthData = new byte[27];
+	private NanitePlantData growthData = new NanitePlantData();
 	
 	private final byte tickOffset;
 	
 	public NanitePlantGrowerTileEntity() {
 		super(CyberBlocks.NANITE_PLANT_GROWER_TET);
 
-		Arrays.fill(growthData, Byte.MIN_VALUE);
 		tickOffset = (byte) (this.hashCode()&15);
 		
 		this.setChanged();
 	}
 	
-	public void setCreationVariables(Vector3i originPos, byte spreadDir, byte energy, byte[] growthData) {
-		this.originPos = originPos;
+	public void setCreationVariables(Direction originDir, byte spreadDir, byte energy, NanitePlantData growthData) {
+		this.originDir = originDir;
+		if (getBlockState()!=null) { level.setBlockAndUpdate(worldPosition, getBlockState().setValue(NaniteRootBlock.FACING, originDir)); }
 		this.spreadDir = spreadDir;
 		this.energy = energy;
 		this.growthData = growthData;
 		
 		this.setChanged();
 	}
+	
+	public void setCreationVariables(Direction originDir, byte energy, NanitePlantData growthData) {
+		this.setCreationVariables(
+				originDir, 
+				NaniteStemBlock.VECTOR_TO_CORE_DIR.get(originDir.getOpposite().getNormal()).byteValue(), 
+				energy, 
+				growthData);
+	}
 
 	@Override
     public void load(BlockState state, CompoundNBT compound) {
         super.load(state, compound);
         
-        originPos = new Vector3i(compound.getInt(originKey+"x"),compound.getInt(originKey+"y"),compound.getInt(originKey+"z"));
-        spread = compound.getBoolean(spreadKey);
+        originDir = Direction.from3DDataValue(compound.getInt(originKey));
+        hasSpread = compound.getBoolean(spreadKey);
         spreadDir = compound.getByte(spreadDirKey);
         energy = compound.getByte(energyKey);
-        growthData = compound.getByteArray(growthKey);
+        growthData.deserializeNBT(compound.getCompound(growthKey));
     }
 
 	@Override
     public CompoundNBT save(CompoundNBT pCompound) {
 		pCompound = super.save(pCompound);
         
-		pCompound.putInt(originKey+"x", originPos.getX());
-		pCompound.putInt(originKey+"y", originPos.getY());
-        pCompound.putInt(originKey+"z", originPos.getZ());
-        
-        pCompound.putBoolean(spreadKey, spread);
+		pCompound.putInt(originKey, originDir.get3DDataValue());        
+        pCompound.putBoolean(spreadKey, hasSpread);
         pCompound.putByte(spreadDirKey, spreadDir);
         pCompound.putByte(energyKey, energy);
-        pCompound.putByteArray(growthKey, growthData);
+        pCompound.put(growthKey, growthData.serializeNBT());
         
         return pCompound;
     }
@@ -80,12 +88,12 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 		if (level.isClientSide) { return; }
 		if ((level.getGameTime()+tickOffset & 15) != 0) { return; }
 
-		if (!spread) {
+		if (!hasSpread) {
 			if (energy>Byte.MIN_VALUE) {
 				expansionPulse();
 			}
 			
-			spread = true;
+			hasSpread = true;
 			this.setChanged();
 		} else {
 			level.setBlockAndUpdate(worldPosition, NaniteStemBlock.coreDirToBlockstate(spreadDir));
@@ -97,33 +105,36 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 	}
 	private boolean expansionStep(BlockPos adj) {
 		if (worldPosition.offset(NaniteStemBlock.coreDirToVector(spreadDir)).equals(adj)) {
+			// Don't spread backwards
 			return false;
 		}
 		BlockState adjState = level.getBlockState(adj);
 		
 		if (NaniteStemBlock.isLoglikeOrNaniteStem(adjState,adj,level)) {
-			if (grow(level, worldPosition, spreadDir, adj, originPos, energy, growthData)) {
+			if (grow(level, worldPosition, adj, originDir, energy, growthData)) {
 				updateOriginGrowthData(
-						NaniteStemBlock.VECTOR_TO_CORE_DIR.get(worldPosition.subtract(adj)).byteValue(),
+						adj.subtract(worldPosition),
 						 countAdjacentLogLikeOrNaniteStem(adj, level));
 				return true;
 			}
 		} else if (adjState.getBlock() == Blocks.AIR) {
 			// Potentially grow out into the air
-			float max = 64;
-			byte direction = NaniteStemBlock.VECTOR_TO_CORE_DIR.get(worldPosition.subtract(adj)).byteValue();
-			for (byte val : growthData) { max = Math.max(max, val-Byte.MIN_VALUE); }
-			max *= 1.5;
+			Direction ownFacing = this.getBlockState().getValue(NanitePlantGrowerBlock.FACING);
+			Vector3i directionNormal = adj.subtract(worldPosition);
 			
-			if (level.random.nextFloat() >= ((growthData[direction]-Byte.MIN_VALUE)/max)) {
+			float growthProb = NanitePlantData.getCorrespondingGrowthProbability(
+					ownFacing,
+					directionNormal,
+					growthData
+					);
+			if (level.random.nextFloat() >= growthProb) {
 				return false;
 			}
-			if (level.random.nextFloat() < 1-((growthData[26]-Byte.MIN_VALUE)/max)
-					&& countAdjacentLogLikeOrNaniteStem(adj, level)>2) {
+			if (countAdjacentLogLikeOrNaniteStem(adj, level)>2) {
 				return false;
 			}
-			
-			return grow(level, worldPosition, spreadDir, adj, originPos, energy, growthData);
+
+			return grow(level, worldPosition, adj, originDir, energy, growthData);
 		}
 		
 		return false;
@@ -140,7 +151,7 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 		return adjLogs;
 	}
 	
-	public static boolean grow(World worldIn, BlockPos pos, byte ownSpreadDir, BlockPos adj, Vector3i originPos, byte energy, byte[] growthData) {
+	public static boolean grow(World worldIn, BlockPos pos, BlockPos adj, Direction originDir, byte energy, NanitePlantData growthData) {
 		byte newEnergy = (byte)(energy-1);
 		BlockPos newSpreadVec = pos.subtract(adj);
 		byte newSpreadDir = NaniteStemBlock.VECTOR_TO_CORE_DIR.get(newSpreadVec).byteValue();
@@ -167,18 +178,15 @@ public class NanitePlantGrowerTileEntity extends TileEntity implements ITickable
 			throw new IllegalStateException("Tile entity of new grower is of wrong type!?");
 		}
 		NanitePlantGrowerTileEntity newGrowerEntity = (NanitePlantGrowerTileEntity) newTileEntity;
-		newGrowerEntity.setCreationVariables(originPos, newSpreadDir, newEnergy, growthData);
+		newGrowerEntity.setCreationVariables(originDir, newSpreadDir, newEnergy, growthData);
 		
 		return true;
 	}
 
-	private void updateOriginGrowthData(byte newDir, int adjacentLogLikeOrNaniteStem) {
-		if (originPos == null) { return; }
+	private void updateOriginGrowthData(BlockPos directionNormal, int adjacentLogLikeOrNaniteStem) {
+		Direction ownFacing = this.getBlockState().getValue(NanitePlantGrowerBlock.FACING);
+		PlantDataField growthDirectionKey = NanitePlantData.getCorrespondingGrowthKey(ownFacing, directionNormal);
 		
-		TileEntity originTile = level.getBlockEntity(new BlockPos(originPos));
-		if (!(originTile instanceof NanitePlantCoreTileEntity)) { return; }
-		
-		NanitePlantCoreTileEntity originCoreEntity = (NanitePlantCoreTileEntity) originTile;
-		originCoreEntity.updateStemGrowthData(newDir, adjacentLogLikeOrNaniteStem);
+		if (growthDirectionKey!=null) { growthData.incrementWeight(growthDirectionKey); }
 	}
 }

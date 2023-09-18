@@ -1,0 +1,59 @@
+{
+  "variants": {
+    "core_dir=0": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=1": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=2": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=3": {
+      "model": "cyberhive:block/nanite_log_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "core_dir=4": {
+      "model": "cyberhive:block/nanite_log_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "core_dir=5": {
+      "model": "cyberhive:block/nanite_log_horizontal",
+      "x": 90
+    },
+    "core_dir=6": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=7": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=8": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=9": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=10": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=11": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=12": {
+      "model": "cyberhive:block/nanite_log_horizontal",
+      "x": 90
+    },
+    "core_dir=13": {
+      "model": "cyberhive:block/nanite_log_horizontal",
+      "x": 90
+    },
+    "core_dir=14": {
+      "model": "cyberhive:block/nanite_log"
+    },
+    "core_dir=15": {
+      "model": "cyberhive:block/nanite_log"
+    }
+  }
+}
