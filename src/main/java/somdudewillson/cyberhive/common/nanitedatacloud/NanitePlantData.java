@@ -1,7 +1,6 @@
 package somdudewillson.cyberhive.common.nanitedatacloud;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
@@ -89,8 +88,8 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 	
 	// ------ Getters/Setters
 	public int getMaxDirectionalWeight() {
-		return IntStream.range(0, 5)
-				.map(i->growthWeights[i]-Byte.MIN_VALUE)
+		return Arrays.stream(PlantDataField.values())
+				.mapToInt(this::getTrueWeight)
 				.max().orElse(0);
 	}
 	
@@ -118,7 +117,7 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		
 		int weight = -1;
 		PlantDataField growthDirectionKey = getCorrespondingGrowthKey(ownDirection, directionNormal);
-		if (growthDirectionKey!=null) { growthData.getTrueWeight(growthDirectionKey); }
+		if (growthDirectionKey!=null) { weight = growthData.getTrueWeight(growthDirectionKey); }
 		
 		return (weight/max);
 	}
@@ -134,10 +133,10 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 			.map(Math::abs)
 			.sum();
 		
-		if (forwardComponent < 0) { return null; }
+		if (forwardComponent < -1) { return null; }
 		if (normDiff.equals(BlockPos.ZERO)) {
 			return PlantDataField.FORWARD_GROWTH;
-		} else if (forwardComponent==0) {
+		} else if (forwardComponent!=0) {
 			if (differingHorizontalComponents==1) {
 				return PlantDataField.PERPENDICULAR_GROWTH;
 			} else {
