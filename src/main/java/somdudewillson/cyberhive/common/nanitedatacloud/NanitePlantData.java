@@ -1,10 +1,13 @@
 package somdudewillson.cyberhive.common.nanitedatacloud;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
+import net.minecraft.util.Direction.AxisDirection;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 
@@ -87,8 +90,9 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 	}
 	
 	// ------ Getters/Setters
+	private static final PlantDataField[] stemWeightFields = new PlantDataField[] {PlantDataField.FORWARD_GROWTH, PlantDataField.ANGLED_GROWTH, PlantDataField.PERPENDICULAR_GROWTH, PlantDataField.DIAGONAL_GROWTH, PlantDataField.CORNER_GROWTH};
 	public int getMaxDirectionalWeight() {
-		return Arrays.stream(PlantDataField.values())
+		return Arrays.stream(stemWeightFields)
 				.mapToInt(this::getTrueWeight)
 				.max().orElse(0);
 	}
@@ -110,7 +114,34 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		growthWeights[idx.getIdx()]++;
 	}
 
-	public static float getCorrespondingGrowthProbability(Direction ownDirection, Vector3i directionNormal, NanitePlantData growthData) {
+	public static Direction calculateNewDirection(BlockPos pos, BlockPos adj, Direction currentDir) {
+		Vector3i directionNormal = adj.subtract(pos);
+		PlantDataField newGrowthKey = getCorrespondingGrowthKey(currentDir, directionNormal);
+		Direction newDirection = Direction.UP;
+		
+		if (newGrowthKey == null) { return null; }
+		switch (newGrowthKey) {
+			default:
+			case FORWARD_GROWTH:
+			case ANGLED_GROWTH:
+			case CORNER_GROWTH:
+				newDirection = currentDir;
+				break;
+			case PERPENDICULAR_GROWTH:
+			case DIAGONAL_GROWTH:
+				newDirection = Arrays.stream(Axis.values())
+								.filter(axis->axis!=currentDir.getAxis())
+								.map(axis->new Tuple<>(axis, directionNormal.get(axis)))
+								.max(Comparator.comparingInt(axisTuple->Math.abs(axisTuple.getB())))
+								.map(axisTuple->Direction.fromAxisAndDirection(axisTuple.getA(), axisTuple.getB()>0?AxisDirection.POSITIVE:AxisDirection.NEGATIVE))
+								.orElse(Direction.UP);
+				break;
+		}
+		
+		return newDirection;
+	}
+
+	public static float getCorrespondingGrowthProbability(Direction ownDirection, Vector3i directionNormal, NanitePlantData growthData, int branchDepth) {
 		float max = 64;
 		max = Math.max(max, growthData.getMaxDirectionalWeight());
 		max *= 1.5;
@@ -119,9 +150,11 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		PlantDataField growthDirectionKey = getCorrespondingGrowthKey(ownDirection, directionNormal);
 		if (growthDirectionKey!=null) { weight = growthData.getTrueWeight(growthDirectionKey); }
 		
-		return (weight/max);
+		float branchDivisor = isBranch(growthDirectionKey)?branchDepth*4:branchDepth*2;
+		return (weight/max)/(branchDivisor+1);
 	}
 
+	// Maybe switch to a lookup table?
 	public static PlantDataField getCorrespondingGrowthKey(Direction ownDirection, Vector3i directionNormal) {
 		BlockPos normDiff = new BlockPos(directionNormal).subtract(ownDirection.getNormal());
 		Axis forwardAxis = ownDirection.getAxis();
@@ -136,7 +169,7 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		if (forwardComponent < -1) { return null; }
 		if (normDiff.equals(BlockPos.ZERO)) {
 			return PlantDataField.FORWARD_GROWTH;
-		} else if (forwardComponent!=0) {
+		} else if (forwardComponent==-1) {
 			if (differingHorizontalComponents==1) {
 				return PlantDataField.PERPENDICULAR_GROWTH;
 			} else {
@@ -148,6 +181,24 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 			} else {
 				return PlantDataField.CORNER_GROWTH;
 			}
+		}
+	}
+	
+	public static boolean isBranch(Direction ownDirection, Vector3i directionNormal) {
+		return isBranch(getCorrespondingGrowthKey(ownDirection, directionNormal));
+	}
+	public static boolean isBranch(PlantDataField growthDirection) {
+		if (growthDirection==null) { return false; }
+		
+		switch (growthDirection) {
+		case PERPENDICULAR_GROWTH:
+		case DIAGONAL_GROWTH:
+			return true;
+		default:
+		case FORWARD_GROWTH:
+		case ANGLED_GROWTH:
+		case CORNER_GROWTH:
+			return false;
 		}
 	}
 }
