@@ -78,12 +78,12 @@ public abstract class NaniteStemBlock extends Block {
 		return coreDirToBlockstate(coreDir);
 	}
 
-	public static boolean isLoglike(BlockState state, BlockPos pos, World worldIn) {
+	public static boolean isLoglike(BlockState state) {
 		return BlockTags.LOGS.contains(state.getBlock());
 	}
 
 	public static boolean isLoglike(BlockPos pos, World worldIn) {
-		return isLoglike(worldIn.getBlockState(pos), pos, worldIn);
+		return isLoglike(worldIn.getBlockState(pos));
 	}
 
 	public static boolean isNaniteStem(BlockState state) {
@@ -94,13 +94,30 @@ public abstract class NaniteStemBlock extends Block {
 		return isNaniteStem(worldIn.getBlockState(pos));
 	}
 
-	public static boolean isLoglikeOrNaniteStem(BlockState state, BlockPos pos, World worldIn) {
-		return isLoglike(state, pos, worldIn) || isNaniteStem(state);
+	public static boolean isNaniteStemGrower(BlockState state) {
+		return (state.getBlock() instanceof NanitePlantGrowerBlock);
+	}
+
+	public static boolean isNaniteStemGrower(BlockPos pos, World worldIn) {
+		return isNaniteStemGrower(worldIn.getBlockState(pos));
+	}
+
+	public static boolean isLoglikeOrNaniteStem(BlockState state) {
+		return isLoglike(state) || isNaniteStem(state);
 	}
 
 	public static boolean isLoglikeOrNaniteStem(BlockPos pos, World worldIn) {
 		BlockState state = worldIn.getBlockState(pos);
-		return isLoglike(state, pos, worldIn) || isNaniteStem(state);
+		return isLoglikeOrNaniteStem(state);
+	}
+
+	public static boolean isLoglikeOrNaniteStemLike(BlockState state) {
+		return isLoglikeOrNaniteStem(state) || isNaniteStemGrower(state);
+	}
+
+	public static boolean isLoglikeOrNaniteStemLike(BlockPos pos, World worldIn) {
+		BlockState state = worldIn.getBlockState(pos);
+		return isLoglikeOrNaniteStemLike(state);
 	}
 
 	public static BlockPos[] getDiagAdjPosArray(final BlockPos center) {
@@ -123,6 +140,12 @@ public abstract class NaniteStemBlock extends Block {
 				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.east(), skip);
 				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.south(), skip);
 				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.west(), skip);
+				
+				// diagonals
+				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.north().east(), skip);
+				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.north().west(), skip);
+				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.south().east(), skip);
+				skip = NaniteStemBlock.markForSkipIfValid(adjOffset.south().west(), skip);
 			}
 		}
 	}
