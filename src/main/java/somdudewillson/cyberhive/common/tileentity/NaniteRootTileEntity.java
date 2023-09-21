@@ -83,8 +83,13 @@ public class NaniteRootTileEntity extends TileEntity implements ITickableTileEnt
 		BlockPos[] adjacents = NaniteStemBlock.getDiagAdjPosArray(worldPosition);
 		for (BlockPos adj : adjacents) {
 			BlockState adjState = worldIn.getBlockState(adj);
-			if (NaniteStemBlock.isLoglikeOrNaniteStem(adjState,adj,worldIn)) {
-				NanitePlantGrowerTileEntity.grow(worldIn, worldPosition, adj, this.getBlockState().getValue(NaniteRootBlock.FACING), (byte)(Byte.MIN_VALUE+3), growthData);
+			if (NaniteStemBlock.isLoglikeOrNaniteStemLike(adjState)) {
+				NanitePlantGrowerTileEntity.grow(
+						worldIn, 
+						worldPosition, adj, 
+						this.getBlockState().getValue(NaniteRootBlock.FACING), this.getBlockState().getValue(NaniteRootBlock.FACING), 
+						(byte)(Byte.MIN_VALUE+3), growthData, (byte)0
+						);
 			}
 		}
 	}
