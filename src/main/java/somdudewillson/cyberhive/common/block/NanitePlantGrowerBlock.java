@@ -11,6 +11,7 @@ import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.world.IBlockReader;
+import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.tileentity.NanitePlantGrowerTileEntity;
 
 public class NanitePlantGrowerBlock extends Block {
@@ -26,6 +27,10 @@ public class NanitePlantGrowerBlock extends Block {
 	@Override
 	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
 		pBuilder.add(FACING);
+	}
+	
+	public static BlockState initializeBlockState(Direction facingDir) {
+		return CyberBlocks.NANITE_PLANT_GROWER.defaultBlockState().setValue(FACING, facingDir);
 	}
 
 	@Override
