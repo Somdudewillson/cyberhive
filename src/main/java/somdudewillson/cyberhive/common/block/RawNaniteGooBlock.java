@@ -44,8 +44,7 @@ public class RawNaniteGooBlock extends Block {
 	
 	public RawNaniteGooBlock() {
 		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0F, 6.0F).speedFactor(0.7F).pushReaction(PushReaction.DESTROY).sound(SoundType.SLIME_BLOCK));
-
-		// setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
+		
 		registerDefaultState(this.defaultBlockState().setValue(LAYERS, Integer.valueOf(MAX_HEIGHT)));
 	}
 	
@@ -96,10 +95,10 @@ public class RawNaniteGooBlock extends Block {
 
 	@Override
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
-		if (pLevel.isClientSide) { return; } 
-		if (!pLevel.isLoaded(pPos)) { return; } // Prevent loading unloaded chunks with block update
+		if (pLevel.isClientSide) { return; }
+		if (!pLevel.isAreaLoaded(pPos, 1)) { return; } // Prevent loading unloaded chunks with block update
 
-		Tuple<BlockPos, BlockState> newTarget = tryFall(pState, pLevel, pPos);		
+		Tuple<BlockPos, BlockState> newTarget = tryFall(pState, pLevel, pPos);
 		pPos = newTarget.getA();
 		pState = newTarget.getB();
 		
@@ -192,7 +191,7 @@ public class RawNaniteGooBlock extends Block {
 			state = result.getB();
 			
 			BlockPos fallPos = pos.below();
-			if (worldIn.isEmptyBlock(fallPos)) {				
+			if (worldIn.isEmptyBlock(fallPos)) {
 				worldIn.setBlockAndUpdate(fallPos, state);
 				worldIn.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 
@@ -226,8 +225,8 @@ public class RawNaniteGooBlock extends Block {
 				continue;
 			}
 			
-			if (fallState.liquid()
-					&& fallState.getFluidState() != null
+			if (fallState.getFluidState() != null
+					&& !fallState.getFluidState().isEmpty()
 					&& fallState.getFluidState().isSource()) {
 				continue;
 			}
