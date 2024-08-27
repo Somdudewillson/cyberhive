@@ -6,15 +6,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NumberNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.util.INBTSerializable;
 import somdudewillson.cyberhive.common.utils.ExtChunkPos;
 import somdudewillson.cyberhive.common.utils.GenericUtils;
 
-public class NaniteChunkData implements INBTSerializable<CompoundNBT> {
+public class NaniteChunkData implements INBTSerializable<CompoundTag> {
 	private ExtChunkPos chunkPos;
 	private static final String TICKS_SINCE_UPDATE_KEY = "ticks_since_update";
 	private int ticksSinceLastUpdate = 0;
@@ -27,7 +27,7 @@ public class NaniteChunkData implements INBTSerializable<CompoundNBT> {
 		ticksSinceLastUpdate++;
 	}
 	
-	public void tick(ServerWorld world) {
+	public void tick(ServerLevel world) {
 		ticksSinceLastUpdate = 0;
 		Set<Entry<BlockPos, NanitePlantData>> plantDataPointSet = plantDataPointMap.entrySet();
 		plantDataPointSet.forEach((entry)->entry.getValue().updateRadius());
@@ -86,8 +86,8 @@ public class NaniteChunkData implements INBTSerializable<CompoundNBT> {
 	}
 
 	@Override
-	public CompoundNBT serializeNBT() {
-		CompoundNBT nbt = new CompoundNBT();
+	public CompoundTag serializeNBT() {
+		CompoundTag nbt = new CompoundTag();
 		nbt.putInt(TICKS_SINCE_UPDATE_KEY, ticksSinceLastUpdate);
 		nbt.put(PLANT_DATA_POINTS_KEY, GenericUtils.serializeMap(plantDataPointMap, 
 				GenericUtils::serializeBlockPos, NanitePlantData::serializeNBT));
@@ -96,9 +96,9 @@ public class NaniteChunkData implements INBTSerializable<CompoundNBT> {
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		ticksSinceLastUpdate = nbt.getInt(TICKS_SINCE_UPDATE_KEY);
-		GenericUtils.<NumberNBT, CompoundNBT, BlockPos, NanitePlantData>deserializeIntoMap(nbt, plantDataPointMap, 
+		GenericUtils.<NumericTag, CompoundTag, BlockPos, NanitePlantData>deserializeIntoMap(nbt, plantDataPointMap, 
 				GenericUtils::deserializeBlockPos, NanitePlantData::deserializeNBT, 
 				()->BlockPos.ZERO, NanitePlantData::new);
 	}

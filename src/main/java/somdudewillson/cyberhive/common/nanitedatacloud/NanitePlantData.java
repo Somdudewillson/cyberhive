@@ -3,13 +3,13 @@ package somdudewillson.cyberhive.common.nanitedatacloud;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Direction.AxisDirection;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.Direction.AxisDirection;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
 
 public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 	public static enum PlantDataField {
@@ -63,15 +63,15 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 	}
 	
 	@Override
-	public CompoundNBT serializeNBT() {
-		CompoundNBT nbt = super.serializeNBT();
+	public CompoundTag serializeNBT() {
+		CompoundTag nbt = super.serializeNBT();
 		nbt.putByteArray(GROWTH_WEIGHT_KEY, growthWeights);
 		
 		return nbt;
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		super.deserializeNBT(nbt);
 		growthWeights = nbt.getByteArray(GROWTH_WEIGHT_KEY);
 	}
@@ -115,7 +115,7 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 	}
 
 	public static Direction calculateNewDirection(BlockPos pos, BlockPos adj, Direction currentDir) {
-		Vector3i directionNormal = adj.subtract(pos);
+		Vec3i directionNormal = adj.subtract(pos);
 		PlantDataField newGrowthKey = getCorrespondingGrowthKey(currentDir, directionNormal);
 		Direction newDirection = Direction.UP;
 		
@@ -141,7 +141,7 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		return newDirection;
 	}
 
-	public static float getCorrespondingGrowthProbability(Direction ownDirection, Vector3i directionNormal, NanitePlantData growthData, int branchDepth) {
+	public static float getCorrespondingGrowthProbability(Direction ownDirection, Vec3i directionNormal, NanitePlantData growthData, int branchDepth) {
 		float max = 64;
 		max = Math.max(max, growthData.getMaxDirectionalWeight());
 		max *= 1.5;
@@ -150,12 +150,12 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		PlantDataField growthDirectionKey = getCorrespondingGrowthKey(ownDirection, directionNormal);
 		if (growthDirectionKey!=null) { weight = growthData.getTrueWeight(growthDirectionKey); }
 		
-		float branchDivisor = isBranch(growthDirectionKey)?branchDepth*4:branchDepth*2;
+		float branchDivisor = isBranch(growthDirectionKey)?branchDepth*16+2:branchDepth*4;
 		return (weight/max)/(branchDivisor+1);
 	}
 
 	// Maybe switch to a lookup table?
-	public static PlantDataField getCorrespondingGrowthKey(Direction ownDirection, Vector3i directionNormal) {
+	public static PlantDataField getCorrespondingGrowthKey(Direction ownDirection, Vec3i directionNormal) {
 		BlockPos normDiff = new BlockPos(directionNormal).subtract(ownDirection.getNormal());
 		Axis forwardAxis = ownDirection.getAxis();
 		
@@ -184,7 +184,7 @@ public class NanitePlantData extends AbstractNaniteData implements Cloneable {
 		}
 	}
 	
-	public static boolean isBranch(Direction ownDirection, Vector3i directionNormal) {
+	public static boolean isBranch(Direction ownDirection, Vec3i directionNormal) {
 		return isBranch(getCorrespondingGrowthKey(ownDirection, directionNormal));
 	}
 	public static boolean isBranch(PlantDataField growthDirection) {

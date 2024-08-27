@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "cyberhive:items/nanite_lump"
+    "layer0": "cyberhive:item/nanite_lump"
   }
 }

@@ -2,21 +2,21 @@ package somdudewillson.cyberhive.common.tileentity;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.NaniteRootBlock;
 import somdudewillson.cyberhive.common.block.NaniteStemBlock;
 import somdudewillson.cyberhive.common.nanitedatacloud.NanitePlantData;
 
-public class NaniteRootTileEntity extends TileEntity implements ITickableTileEntity {
-    public static final List<Block> logsWood = BlockTags.LOGS.getValues();
+public class NaniteRootTileEntity extends BlockEntity {
+    public static final List<Block> logsWood = ForgeRegistries.BLOCKS.tags().getTag(BlockTags.LOGS).stream().toList();
     
 	private int tickOffset;
 	
@@ -29,8 +29,8 @@ public class NaniteRootTileEntity extends TileEntity implements ITickableTileEnt
 	private static String growthKey = "growth_data";
 	private NanitePlantData growthData = new NanitePlantData();
 	
-	public NaniteRootTileEntity() {
-		super(CyberBlocks.NANITE_ROOT_TET);
+	public NaniteRootTileEntity(BlockPos pPos, BlockState pBlockState) {
+		super(CyberBlocks.NANITE_ROOT_TET.get(), pPos, pBlockState);
 		
 		// Arrays.fill(growthData, Byte.MIN_VALUE);
 		// this.setChanged();
@@ -42,8 +42,8 @@ public class NaniteRootTileEntity extends TileEntity implements ITickableTileEnt
     }
 
 	@Override
-    public void load(BlockState state, CompoundNBT compound) {
-        super.load(state, compound);
+    public void load(CompoundTag compound) {
+        super.load(compound);
         
         age = compound.getShort(ageKey);
         energy = compound.getInt(energyKey);
@@ -52,34 +52,32 @@ public class NaniteRootTileEntity extends TileEntity implements ITickableTileEnt
     }
 
 	@Override
-    public CompoundNBT save(CompoundNBT pCompound) {
-		pCompound = super.save(pCompound);
+    public void saveAdditional(CompoundTag pCompound) {
+		super.saveAdditional(pCompound);
         
 		pCompound.putShort(ageKey, age);
 		pCompound.putInt(energyKey, energy);
 		pCompound.putByte(levelKey, level);
         pCompound.put(growthKey, growthData.serializeNBT());
-        
-        return pCompound;
     }
 
-	@Override
-	public void tick() {
-		if (super.level.isClientSide()) { return; }
-		if ((super.level.getGameTime()+tickOffset & 31) != 0) { return; }
+	public static void tick(Level level, BlockPos pos, BlockState state, BlockEntity blockEntityRaw) {
+		if (level.isClientSide()) { return; }
+		NaniteRootTileEntity blockEntity = (NaniteRootTileEntity) blockEntityRaw;
+		if ((level.getGameTime()+blockEntity.tickOffset & 31) != 0) { return; }
 		
-		age++;
-		energy++;
+		blockEntity.age++;
+		blockEntity.energy++;
 		
-		if (energy>=15) {
-			expansionPulse(super.level);
-			energy-=15;
+		if (blockEntity.energy>=15) {
+			blockEntity.expansionPulse(level);
+			blockEntity.energy-=15;
 		}
 		
-		this.setChanged();
+		blockEntity.setChanged();
 	}
 	
-	private void expansionPulse(World worldIn) {
+	private void expansionPulse(Level worldIn) {
 		BlockPos[] adjacents = NaniteStemBlock.getDiagAdjPosArray(worldPosition);
 		for (BlockPos adj : adjacents) {
 			BlockState adjState = worldIn.getBlockState(adj);

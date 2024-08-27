@@ -1,41 +1,42 @@
 package somdudewillson.cyberhive.common;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 
 public class ContactEvents {
 	
 	@SubscribeEvent
-	public void livingUpdate(LivingEvent.LivingUpdateEvent event) {
-		LivingEntity livingEntity = event.getEntityLiving();
-		World world = livingEntity.level;
+	public void livingUpdate(LivingTickEvent event) {
+		LivingEntity livingEntity = event.getEntity();
+		Level world = livingEntity.level();
 		if (world.isClientSide()) { return; }
+		if (!CyberPotions.NANITE_CONVERT.isPresent()) { return; }
 		if ((world.getGameTime()+livingEntity.getId() & 15) != 0) { return; }
 		
-		EffectInstance existingNaniteEffect = livingEntity.getEffect(CyberPotions.NANITE_CONVERT);
+		MobEffectInstance existingNaniteEffect = livingEntity.getEffect(CyberPotions.NANITE_CONVERT.get());
 		if (existingNaniteEffect!=null && existingNaniteEffect.getDuration()>=20) {
 			return;
 		}
 			
 		if (!doContactEffects(livingEntity,world,livingEntity.blockPosition())
-				&& livingEntity.isOnGround()) {
+				&& livingEntity.onGround()) {
 			doContactEffects(livingEntity,world,livingEntity.blockPosition().below());
 		}
 	}
 	
-	private boolean doContactEffects(LivingEntity livingEntity, World worldIn, BlockPos pos) {
+	private boolean doContactEffects(LivingEntity livingEntity, Level worldIn, BlockPos pos) {
 		BlockState stateAtPos = worldIn.getBlockState(pos);
 		Block blockAtPos = stateAtPos.getBlock();
 		
-		if (blockAtPos.isAir(stateAtPos, worldIn, pos)) {
+		if (stateAtPos.isAir()) {
 			return false;
 		}
 		if (stateAtPos.getCollisionShape(worldIn, pos).isEmpty()
@@ -43,8 +44,8 @@ public class ContactEvents {
 			return false;
 		}
 		
-		if (blockAtPos == CyberBlocks.RAW_NANITE_GOO) {
-			livingEntity.addEffect(new EffectInstance(CyberPotions.NANITE_CONVERT, 120));
+		if (blockAtPos == CyberBlocks.RAW_NANITE_GOO.get()) {
+			livingEntity.addEffect(new MobEffectInstance(CyberPotions.NANITE_CONVERT.get(), 120));
 			
 			int layers = stateAtPos.getValue(RawNaniteGooBlock.LAYERS);
 			layers--;
@@ -55,12 +56,12 @@ public class ContactEvents {
 			}
 			return true;
 		}
-		if (blockAtPos == CyberBlocks.PRESSURIZED_NANITE_GOO) {
-			livingEntity.addEffect(new EffectInstance(CyberPotions.NANITE_CONVERT, 120));
+		if (blockAtPos == CyberBlocks.PRESSURIZED_NANITE_GOO.get()) {
+			livingEntity.addEffect(new MobEffectInstance(CyberPotions.NANITE_CONVERT.get(), 120));
 			return true;
 		}
-		if (blockAtPos == CyberBlocks.NANITE_GRASS) {
-			livingEntity.addEffect(new EffectInstance(CyberPotions.NANITE_CONVERT, 40));
+		if (blockAtPos == CyberBlocks.NANITE_GRASS.get()) {
+			livingEntity.addEffect(new MobEffectInstance(CyberPotions.NANITE_CONVERT.get(), 40));
 			return true;
 		}
 		

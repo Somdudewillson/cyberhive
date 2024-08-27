@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "cyberhive:blocks/nanite_log_top",
-    "side": "cyberhive:blocks/nanite_root_detached"
+    "end": "cyberhive:block/nanite_log_top",
+    "side": "cyberhive:block/nanite_root_detached"
   }
 }

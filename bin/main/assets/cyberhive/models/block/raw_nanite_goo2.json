@@ -1,7 +1,7 @@
 {   "parent": "block/thin_block",
     "textures": {
-        "particle": "cyberhive:blocks/rawnanitegoo",
-        "texture": "cyberhive:blocks/rawnanitegoo"
+        "particle": "cyberhive:block/rawnanitegoo",
+        "texture": "cyberhive:block/rawnanitegoo"
     },
     "elements": [
         {   "from": [ 0, 0, 0 ],

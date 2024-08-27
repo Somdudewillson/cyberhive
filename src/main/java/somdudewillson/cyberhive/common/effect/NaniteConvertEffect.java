@@ -4,37 +4,33 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import somdudewillson.cyberhive.CyberhiveMod;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
 
-public class NaniteConvertEffect extends Effect {
-	private ResourceLocation icon;
+public class NaniteConvertEffect extends MobEffect {
+//	private ResourceLocation icon;
 
 	public NaniteConvertEffect() {
-		super(EffectType.HARMFUL, Color.gray.getRGB());
+		super(MobEffectCategory.HARMFUL, Color.gray.getRGB());
 
-		setRegistryName("nanite_convert_effect");
 		// setPotionName(CyberhiveMod.MODID + ".effect." + getRegistryName().getPath());
-		this.icon = new ResourceLocation(CyberhiveMod.MODID,
-				"textures/gui/potion/"+getRegistryName().getPath()+".png");
+//		this.icon = new ResourceLocation(CyberhiveMod.MODID,
+//				"textures/gui/potion/"+getRegistryName().getPath()+".png");
 	}
 	
 	@Override
     public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
-		pLivingEntity.hurt(DamageSource.MAGIC, 1.0F);
+		pLivingEntity.hurt(pLivingEntity.level().damageSources().magic(), 1.0F);
 		
         if (!pLivingEntity.isAlive()
-        		&& !pLivingEntity.level.isClientSide) {
-        	pLivingEntity.level.setBlockAndUpdate(
+        		&& !pLivingEntity.level().isClientSide) {
+        	pLivingEntity.level().setBlockAndUpdate(
         			pLivingEntity.blockPosition(),
-        			CyberBlocks.PRESSURIZED_NANITE_GOO.defaultBlockState()
+        			CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState()
         			.setValue(PressurizedNaniteGooBlock.DENSITY, 
         					(int)Math.min(
         							Math.ceil(pLivingEntity.getMaxHealth()/8),

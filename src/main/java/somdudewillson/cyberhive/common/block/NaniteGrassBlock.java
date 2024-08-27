@@ -1,16 +1,14 @@
 package somdudewillson.cyberhive.common.block;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 
 public class NaniteGrassBlock extends Block {	
 	public NaniteGrassBlock() {
-		super(AbstractBlock.Properties.of(Material.GRASS, MaterialColor.GRASS).strength(0.5F).sound(SoundType.GRASS));
-
-		setRegistryName("nanite_grass");
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(0.6F).sound(SoundType.GRASS));
+		
 		// setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getPath());
 	}
 }

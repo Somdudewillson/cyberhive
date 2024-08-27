@@ -1,51 +1,53 @@
 package somdudewillson.cyberhive.common.block;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
+import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.tileentity.NaniteRootTileEntity;
 
-public class NaniteRootBlock extends NaniteStemBlock {
+public class NaniteRootBlock extends NaniteStemBlock implements EntityBlock {
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
 	public static final BooleanProperty ATTACHED = BlockStateProperties.ATTACHED;
 
 	public NaniteRootBlock() {
-		super(AbstractBlock.Properties.of(Material.METAL, MaterialColor.WOOD).strength(4.0F, 3.5F)
-				.sound(SoundType.WOOD));
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(4.0F, 3.5F).sound(SoundType.WOOD));
 
-		setRegistryName("nanite_root");
 		registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.UP).setValue(ATTACHED, false));
 	}
 
 	@Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new NaniteRootTileEntity();
+    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+        return new NaniteRootTileEntity(pPos, pState);
     }
 	
-	@Override
-	public boolean hasTileEntity(BlockState state) {
-		return true;
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+		  return type == CyberBlocks.NANITE_ROOT_TET.get() ? NaniteRootTileEntity::tick : null;
 	}
 
 	private static final Direction[] ROOTING_ORDER = new Direction[] { Direction.DOWN, Direction.NORTH, Direction.EAST,
 			Direction.SOUTH, Direction.WEST, Direction.UP };
-	private BlockState updateRooting(World pLevel, BlockPos pPos, BlockState pState) {
-		BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+	private BlockState updateRooting(Level pLevel, BlockPos pPos, BlockState pState) {
+		BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos();
 
 		for (Direction direction : ROOTING_ORDER) {
 			blockpos$mutable.setWithOffset(pPos, direction);
@@ -60,16 +62,15 @@ public class NaniteRootBlock extends NaniteStemBlock {
 	}
 
 	@Override
-	public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, IWorld pLevel,
-			BlockPos pCurrentPos, BlockPos pFacingPos) {
+	public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState, LevelAccessor pLevel, BlockPos pPos, BlockPos pNeighborPos) {
 		if (pState.getValue(ATTACHED)) {
-			if (pFacing.getOpposite() == pState.getValue(FACING) && !rootableBlockState(pFacingState)) {
+			if (pDirection.getOpposite() == pState.getValue(FACING) && !rootableBlockState(pNeighborState)) {
 				pState = pState.setValue(ATTACHED, false);
-				pLevel.getBlockTicks().scheduleTick(pCurrentPos, this, 1);
+				pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(this, pPos, 1, TickPriority.NORMAL, 0));
 			}
-		} else if (rootableBlockState(pFacingState)) {
+		} else if (rootableBlockState(pNeighborState)) {
 			pState = pState
-					.setValue(FACING, pFacing.getOpposite())
+					.setValue(FACING, pDirection.getOpposite())
 					.setValue(ATTACHED, true);
 		}
 
@@ -82,12 +83,12 @@ public class NaniteRootBlock extends NaniteStemBlock {
 	}
 
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
 		pBuilder.add(FACING, ATTACHED);
 	}
 
 	@Override
-	public BlockState getStateForPlacement(BlockItemUseContext pContext) {
+	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
 		return updateRooting(pContext.getLevel(), pContext.getClickedPos(), this.defaultBlockState());
 	}
 

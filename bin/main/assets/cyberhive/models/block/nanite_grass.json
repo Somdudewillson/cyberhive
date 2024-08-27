@@ -3,7 +3,7 @@
     "textures": {
         "particle": "minecraft:block/dirt",
         "bottom": "minecraft:block/dirt",
-        "top": "cyberhive:blocks/nanite_grass_top",
-        "side": "cyberhive:blocks/nanite_grass_side"
+        "top": "cyberhive:block/nanite_grass_top",
+        "side": "cyberhive:block/nanite_grass_side"
     }
 }

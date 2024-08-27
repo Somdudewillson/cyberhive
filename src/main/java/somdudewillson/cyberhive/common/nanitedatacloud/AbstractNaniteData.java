@@ -1,11 +1,11 @@
 package somdudewillson.cyberhive.common.nanitedatacloud;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import somdudewillson.cyberhive.common.utils.GenericUtils;
 
-public abstract class AbstractNaniteData implements INBTSerializable<CompoundNBT>, Cloneable {
+public abstract class AbstractNaniteData implements INBTSerializable<CompoundTag>, Cloneable {
 	protected int prevRadiusWeight = -1;
 	protected int nextRadiusWeight = nextRadiusThreshold();
 	
@@ -20,8 +20,8 @@ public abstract class AbstractNaniteData implements INBTSerializable<CompoundNBT
 	}
 	
 	@Override
-	public CompoundNBT serializeNBT() {
-		CompoundNBT nbt = new CompoundNBT();
+	public CompoundTag serializeNBT() {
+		CompoundTag nbt = new CompoundTag();
 		nbt.putInt(WEIGHT_KEY, weight);
 		nbt.putInt(RADIUS_KEY, radius);
 		
@@ -29,7 +29,7 @@ public abstract class AbstractNaniteData implements INBTSerializable<CompoundNBT
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		weight = nbt.getInt(WEIGHT_KEY);
 		radius = nbt.getInt(RADIUS_KEY);
 		

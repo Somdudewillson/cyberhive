@@ -1,22 +1,40 @@
 package somdudewillson.cyberhive.common;
 
-import net.minecraft.item.Item;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import java.util.LinkedList;
+
+import lombok.Synchronized;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.RegistryObject;
 import somdudewillson.cyberhive.CyberhiveMod;
 import somdudewillson.cyberhive.common.item.ItemNaniteLump;
 
 public class CyberItems {
+	private static final LinkedList<RegistryObject<Item>> EXTRA_ITEMS_FOR_CREATIVE_TAB = new LinkedList<>();
 	
 	//Items ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	public static final Item NANITE_LUMP = new ItemNaniteLump(); 
+	public static final RegistryObject<Item> NANITE_LUMP = CyberhiveMod.ITEMS.register("nanite_lump", ItemNaniteLump::new);
 	
-	@SubscribeEvent
-	public void registerItems(RegistryEvent.Register<Item> event) {
-	    event.getRegistry().registerAll(NANITE_LUMP);
-	    
-	    CyberhiveMod.LOGGER.debug("Registered Items");
-	}
+	//Creative Tab ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    public static final RegistryObject<CreativeModeTab> CYBER_HIVE_TAB = CyberhiveMod.CREATIVE_MODE_TABS
+    		.register("cyber_hive_tab", () -> CreativeModeTab.builder()
+            .withTabsBefore(CreativeModeTabs.FUNCTIONAL_BLOCKS)
+            .icon(() -> NANITE_LUMP.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
+                output.accept(NANITE_LUMP.get());
+                
+                EXTRA_ITEMS_FOR_CREATIVE_TAB.stream()
+                	.map(RegistryObject::get)
+                	.sequential()
+                	.forEach(output::accept);
+            }).build());
+
+    @SuppressWarnings("unchecked")
+	@Synchronized("EXTRA_ITEMS_FOR_CREATIVE_TAB")
+    public static void addExtraCreativeTabItem(RegistryObject<? extends Item> itemRegistryObject) {
+    	EXTRA_ITEMS_FOR_CREATIVE_TAB.add((RegistryObject<Item>) itemRegistryObject);
+    }
 	
 //	@SubscribeEvent
 //	public void registerModels(ModelRegistryEvent event) {

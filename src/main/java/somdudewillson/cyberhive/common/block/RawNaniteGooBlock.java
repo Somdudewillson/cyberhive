@@ -2,34 +2,35 @@ package somdudewillson.cyberhive.common.block;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.block.material.PushReaction;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
@@ -38,24 +39,22 @@ import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, MAX_HEIGHT);
-	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {VoxelShapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
-	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() };
-	protected static final Material NANITE_GOO_MATERIAL = new Material(MaterialColor.METAL, false, false, false, false, false, true, PushReaction.DESTROY); 
+	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
+	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() }; 
 	
 	public RawNaniteGooBlock() {
-		super(AbstractBlock.Properties.of(NANITE_GOO_MATERIAL).strength(4.0F, 6.0F).speedFactor(0.7F).sound(SoundType.SLIME_BLOCK));
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0F, 6.0F).speedFactor(0.7F).pushReaction(PushReaction.DESTROY).sound(SoundType.SLIME_BLOCK));
 
-		setRegistryName("raw_nanite_goo");
 		// setUnlocalizedName(CyberhiveMod.MODID + "." + getRegistryName().getResourcePath());
 		registerDefaultState(this.defaultBlockState().setValue(LAYERS, Integer.valueOf(MAX_HEIGHT)));
 	}
 	
-	public int tickRate(World worldIn) {
+	public int tickRate(Level worldIn) {
 		return 20;
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState pState, IBlockReader pLevel, BlockPos pPos, PathType pType) {
+	public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
 		switch (pType) {
 		case LAND:
 			return pState.getValue(LAYERS) < MAX_HEIGHT / 2;
@@ -66,21 +65,21 @@ public class RawNaniteGooBlock extends Block {
 		}
 	}
 	@Override
-	public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
+	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
 		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
 	}
 	@Override
-	public VoxelShape getCollisionShape(BlockState pState, IBlockReader pLevel, BlockPos pPos,
-			ISelectionContext pContext) {
+	public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos,
+			CollisionContext pContext) {
 		return SHAPE_BY_LAYER[pState.getValue(LAYERS) - 1];
 	}
 	@Override
-	public VoxelShape getBlockSupportShape(BlockState pState, IBlockReader pReader, BlockPos pPos) {
+	public VoxelShape getBlockSupportShape(BlockState pState, BlockGetter pReader, BlockPos pPos) {
 		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
 	}
 	@Override
-	public VoxelShape getVisualShape(BlockState pState, IBlockReader pReader, BlockPos pPos,
-			ISelectionContext pContext) {
+	public VoxelShape getVisualShape(BlockState pState, BlockGetter pReader, BlockPos pPos,
+			CollisionContext pContext) {
 		return SHAPE_BY_LAYER[pState.getValue(LAYERS)];
 	}
 	@Override
@@ -89,14 +88,14 @@ public class RawNaniteGooBlock extends Block {
 	}
     
     @Override
-    public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+    public List<ItemStack> getDrops(BlockState pState, LootParams.Builder pBuilder) {
     	LinkedList<ItemStack> dropList = new LinkedList<ItemStack>();
-    	dropList.add(new ItemStack(CyberItems.NANITE_LUMP, pState.getValue(LAYERS)));
+    	dropList.add( new ItemStack(CyberItems.NANITE_LUMP.get(), pState.getValue(LAYERS)) );
     	return dropList;
     }
 
 	@Override
-    public void tick(BlockState pState, ServerWorld pLevel, BlockPos pPos, Random pRand) {
+    public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		if (pLevel.isClientSide) { return; } 
 		if (!pLevel.isLoaded(pPos)) { return; } // Prevent loading unloaded chunks with block update
 
@@ -115,13 +114,14 @@ public class RawNaniteGooBlock extends Block {
 		
 		if (layers>0) {
 			pLevel.setBlockAndUpdate(pPos, pState.setValue(LAYERS, layers));
-			pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
+	    	pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(
+	    			this, pPos, this.tickRate(pLevel), TickPriority.LOW, 0));
 		} else {
 			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
 		}
     }
 	
-	private int spread(BlockState pState, ServerWorld pLevel, Random pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
+	private int spread(BlockState pState, ServerLevel pLevel, RandomSource pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
 		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
 			BlockPos adjPos = adjacent[adjIdx];
 			BlockState adjState = adjStates[adjIdx];
@@ -137,7 +137,7 @@ public class RawNaniteGooBlock extends Block {
 			}
 			
 			Block adjBlock = adjState.getBlock();
-			if (adjBlock == CyberBlocks.RAW_NANITE_GOO) {
+			if (adjBlock == CyberBlocks.RAW_NANITE_GOO.get()) {
 				int adjLayers = adjState.getValue(LAYERS);
 				if (adjLayers<8 && layers-adjLayers+pRand.nextInt(2)>1) {
 					BlockState newState = adjState.setValue(LAYERS, adjLayers+1);
@@ -152,7 +152,7 @@ public class RawNaniteGooBlock extends Block {
 		return layers;
 	}
 	
-	private int performConversions(BlockState pState, ServerWorld pLevel, BlockPos pPos, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
+	private int performConversions(BlockState pState, ServerLevel pLevel, BlockPos pPos, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
 		IBlockConversion currentPriorityConversion = null;
 		int conversionTargetAdjIdx = 0;
 		int currentPriority = -1;
@@ -182,7 +182,7 @@ public class RawNaniteGooBlock extends Block {
 	}
 	
 	// TODO: Maybe add rotated model to create nanite goo "waterfalls"?
-	private Tuple<BlockPos, BlockState> tryFall(BlockState state, ServerWorld worldIn, BlockPos pos) {
+	private Tuple<BlockPos, BlockState> tryFall(BlockState state, ServerLevel worldIn, BlockPos pos) {
 		Tuple<BlockPos, BlockState> result = new Tuple<BlockPos, BlockState>(pos,state);
 		
 		boolean keepFalling = false;
@@ -202,7 +202,7 @@ public class RawNaniteGooBlock extends Block {
 			}
 			
 			BlockState fallState = worldIn.getBlockState(fallPos);
-			if (fallState.getBlock() == CyberBlocks.RAW_NANITE_GOO) {
+			if (fallState.getBlock() == CyberBlocks.RAW_NANITE_GOO.get()) {
 				if (fallState.getValue(LAYERS)>=MAX_HEIGHT) { continue; }
 				
 				int targetLayers = fallState.getValue(LAYERS);
@@ -226,13 +226,13 @@ public class RawNaniteGooBlock extends Block {
 				continue;
 			}
 			
-			if (fallState.getMaterial().isLiquid()
+			if (fallState.liquid()
 					&& fallState.getFluidState() != null
 					&& fallState.getFluidState().isSource()) {
 				continue;
 			}
 			
-			if (fallState.canBeReplaced(new BlockItemUseContext(worldIn, null, null, ItemStack.EMPTY, new BlockRayTraceResult(Vector3d.ZERO, Direction.UP, pos, false)))) {
+			if (fallState.canBeReplaced(new BlockPlaceContext(worldIn, null, null, ItemStack.EMPTY, new BlockHitResult(Vec3.ZERO, Direction.UP, pos, false)))) {
 				worldIn.destroyBlock(fallPos, true);
 				worldIn.setBlockAndUpdate(fallPos, state);
 				worldIn.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
@@ -246,13 +246,14 @@ public class RawNaniteGooBlock extends Block {
 	}
 	
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
 		pBuilder.add(LAYERS);
 	}
     
     @Override
-    public void onPlace(BlockState pState, World pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+    public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
     	if (pLevel.isClientSide) { return; }
-    	pLevel.getBlockTicks().scheduleTick(pPos, this, this.tickRate(pLevel));
+    	pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(
+    			this, pPos, this.tickRate(pLevel), TickPriority.LOW, 0));
     }
 }

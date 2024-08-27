@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "cyberhive:blocks/rawnanitegoo"
+    "all": "cyberhive:block/rawnanitegoo"
   }
 }

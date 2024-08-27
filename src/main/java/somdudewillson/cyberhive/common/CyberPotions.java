@@ -1,17 +1,12 @@
 package somdudewillson.cyberhive.common;
 
-import net.minecraft.potion.Effect;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraftforge.registries.RegistryObject;
+import somdudewillson.cyberhive.CyberhiveMod;
 import somdudewillson.cyberhive.common.effect.NaniteConvertEffect;
 
 public class CyberPotions {
 	
 	// Effects ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	public static final Effect NANITE_CONVERT = new NaniteConvertEffect(); 
-	
-	@SubscribeEvent
-	public void registerBlocks(RegistryEvent.Register<Effect> event) {
-	    event.getRegistry().registerAll(NANITE_CONVERT);
-	}
+	public static final RegistryObject<MobEffect> NANITE_CONVERT = CyberhiveMod.MOB_EFFECTS.register("nanite_convert_effect", NaniteConvertEffect::new); 
 }

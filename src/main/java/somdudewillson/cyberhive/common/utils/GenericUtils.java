@@ -1,19 +1,21 @@
 package somdudewillson.cyberhive.common.utils;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.LongNBT;
-import net.minecraft.nbt.NumberNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class GenericUtils {
@@ -29,7 +31,7 @@ public class GenericUtils {
 	/**
 	 * In-place Durstenfeld shuffle for arrays
 	 */
-	public static <T> void shuffleArray(T[] array, Random rng) {
+	public static <T> void shuffleArray(T[] array, RandomSource rng) {
 		for (int i = array.length - 1; i > 0; i--) {
 			int index = rng.nextInt(i + 1);
 
@@ -38,8 +40,16 @@ public class GenericUtils {
 			array[i] = a;
 		}
 	}
+	
+	public static <T> void shuffleCollection(Collection<T> collection, RandomSource rng) {
+		@SuppressWarnings("unchecked")
+		T[] collectionAsArray = (T[]) collection.toArray();
+		shuffleArray(collectionAsArray, rng);
+		collection.clear();
+		Arrays.stream(collectionAsArray).forEachOrdered(collection::add);
+	}
 
-	public static int distChebyshev(Vector3i vecA, Vector3i vecB) {
+	public static int distChebyshev(Vec3i vecA, Vec3i vecB) {
 		int dist = Math.abs(vecA.getX() - vecB.getX());
 		dist = Math.max(dist, Math.abs(vecA.getY() - vecB.getY()));
 		dist = Math.max(dist, Math.abs(vecA.getZ() - vecB.getZ()));
@@ -50,19 +60,19 @@ public class GenericUtils {
 		return Math.max(Math.abs(vecA.x - vecB.x), Math.abs(vecA.z - vecB.z));
 	}
 
-	public static NumberNBT serializeBlockPos(BlockPos pos) {
-		return LongNBT.valueOf(pos.asLong());
+	public static NumericTag serializeBlockPos(BlockPos pos) {
+		return LongTag.valueOf(pos.asLong());
 	}
-	public static BlockPos deserializeBlockPos(BlockPos __, NumberNBT nbt) {
+	public static BlockPos deserializeBlockPos(BlockPos __, NumericTag nbt) {
 		return BlockPos.of(nbt.getAsLong());
 	}
 	
-	public static <K extends INBTSerializable<? extends INBT>, V extends INBTSerializable<? extends INBT>> CompoundNBT serializeMap(Map<K,V> map) {
+	public static <K extends INBTSerializable<? extends Tag>, V extends INBTSerializable<? extends Tag>> CompoundTag serializeMap(Map<K,V> map) {
 		return serializeMap(map, K::serializeNBT, V::serializeNBT);
 	}
-	public static <K, V> CompoundNBT serializeMap(Map<K,V> map, 
-			Function<K, ? extends INBT> keySerializer, Function<V,? extends INBT> valueSerializer) {
-		CompoundNBT nbt = new CompoundNBT();
+	public static <K, V> CompoundTag serializeMap(Map<K,V> map, 
+			Function<K, ? extends Tag> keySerializer, Function<V,? extends Tag> valueSerializer) {
+		CompoundTag nbt = new CompoundTag();
 		
 		int i=0;
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -72,22 +82,23 @@ public class GenericUtils {
 		
 		return nbt;
 	}
-	public static <KN extends INBT,VN extends INBT,K extends INBTSerializable<KN>, V extends INBTSerializable<VN>> void deserializeIntoMap(CompoundNBT nbt, Map<K,V> map, Supplier<K> keyFactory, Supplier<V> valueFactory) {
+	public static <KN extends Tag,VN extends Tag,K extends INBTSerializable<KN>, V extends INBTSerializable<VN>> 
+	void deserializeIntoMap(CompoundTag nbt, Map<K,V> map, Supplier<K> keyFactory, Supplier<V> valueFactory) {
 		deserializeIntoMap(nbt, map, K::deserializeNBT, V::deserializeNBT, keyFactory, valueFactory);
 	}
 	@SuppressWarnings("unchecked")
-	public static <KN extends INBT,VN extends INBT,K, V> void deserializeIntoMap(CompoundNBT nbt, Map<K,V> map, 
+	public static <KN extends Tag,VN extends Tag,K, V> void deserializeIntoMap(CompoundTag nbt, Map<K,V> map, 
 			BiConsumer<K, KN> keyDeserializer, BiConsumer<V, VN> valueDeserializer, 
 			Supplier<K> keyFactory, Supplier<V> valueFactory) {
 		int i=0;
 		while (nbt.contains("k"+i) && nbt.contains("v"+i)) {
 			try {
 				K key = keyFactory.get();
-				INBT keyNBT = nbt.get("k"+i);
+				Tag keyNBT = nbt.get("k"+i);
 				keyDeserializer.accept(key, (KN)keyNBT);
 				
 				V value = valueFactory.get();
-				INBT valueNBT = nbt.get("v"+i);
+				Tag valueNBT = nbt.get("v"+i);
 				valueDeserializer.accept(value, (VN)valueNBT);
 				
 				map.put(key, value);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import somdudewillson.cyberhive.common.utils.ExtChunkPos;
 import somdudewillson.cyberhive.common.utils.GenericUtils;
 
@@ -13,7 +13,7 @@ public class NaniteDimensionData {
 	
 	private HashMap<ExtChunkPos, NaniteChunkData> naniteChunkDataMap = new HashMap<>();
 	
-	public void tick(ServerWorld world) {
+	public void tick(ServerLevel world) {
 		ExtChunkPos[] chunkPosWithNaniteData = naniteChunkDataMap.keySet().toArray(new ExtChunkPos[0]);
 		GenericUtils.shuffleArray(chunkPosWithNaniteData, world.random);
 		
