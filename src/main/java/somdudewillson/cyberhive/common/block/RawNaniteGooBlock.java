@@ -137,7 +137,7 @@ public class RawNaniteGooBlock extends Block {
 
 	private boolean tryConsumeFood(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		VoxelShape shape = getShape(pState, pLevel, pPos, null);
-		double addedLayers = pLevel.getEntitiesOfClass( ItemEntity.class, shape.bounds().move(pPos.getCenter()).inflate(0.2) )
+		double addedLayers = pLevel.getEntitiesOfClass( ItemEntity.class, shape.bounds().move(pPos.getCenter()).inflate(0.15, 0.334, 0.15) )
 			.stream()
 			.map(itemEntity->new Tuple<>(itemEntity, itemEntity.getItem()))
 			.filter(itemEntityTuple->itemEntityTuple.getB().isEdible())
