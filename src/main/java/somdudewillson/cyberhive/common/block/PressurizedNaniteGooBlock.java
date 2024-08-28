@@ -51,9 +51,12 @@ public class PressurizedNaniteGooBlock extends Block {
 	@Override
 	public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		if (pLevel.isClientSide) { return; } 
-		if (!pLevel.isLoaded(pPos)) { return; } // Prevent loading unloaded chunks with block update
+		if (!pLevel.isAreaLoaded(pPos, 1)) { return; } // Prevent loading unloaded chunks with block update
 		
 		if (tryFall(pState, pLevel, pPos)) {
+			return;
+		}
+		if (tryDrift(pState, pLevel, pPos, pRand)) {
 			return;
 		}
 		
@@ -72,9 +75,9 @@ public class PressurizedNaniteGooBlock extends Block {
 	
 	private boolean tryFall(BlockState pState, ServerLevel pLevel, BlockPos pPos) {
 		BlockState belowBlockState = pLevel.getBlockState(pPos.below());
-		Block belowBlock = belowBlockState.getBlock();
 		
-		if (belowBlock == CyberBlocks.RAW_NANITE_GOO.get()) {
+		if (belowBlockState.is(CyberBlocks.RAW_NANITE_GOO.get()) 
+				&& belowBlockState.getValue(RawNaniteGooBlock.LAYERS)<RawNaniteGooBlock.MAX_HEIGHT) {
 			pLevel.setBlockAndUpdate(pPos.below(), pState);
 			pLevel.setBlockAndUpdate(pPos, belowBlockState);
 			return true;
@@ -86,6 +89,28 @@ public class PressurizedNaniteGooBlock extends Block {
 			return true;
 		}
 		
+		return false;
+	}
+	
+	private boolean tryDrift(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
+		float driftRoll = pRand.nextFloat();
+		BlockState consideredState = pState;
+		BlockPos consideredPos = pPos;
+		if (
+				(
+						(driftRoll < 0.8 
+						&& (consideredState = pLevel.getBlockState( (consideredPos = pPos.above())) ).is(CyberBlocks.RAW_NANITE_GOO.get()))
+						||
+						(driftRoll < 0.4
+						&& (consideredState = pLevel.getBlockState( (consideredPos = pPos.relative(Direction.values()[pRand.nextInt(2, 6)]))) ).is(CyberBlocks.RAW_NANITE_GOO.get()))
+				)
+				&& consideredState.getValue(RawNaniteGooBlock.LAYERS)==RawNaniteGooBlock.MAX_HEIGHT
+			) {
+			pLevel.setBlockAndUpdate(consideredPos, pState);
+			pLevel.setBlockAndUpdate(pPos, consideredState);
+			return true;
+		}
+
 		return false;
 	}
 	
