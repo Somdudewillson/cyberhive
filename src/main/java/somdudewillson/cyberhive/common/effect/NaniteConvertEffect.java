@@ -10,6 +10,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
+import somdudewillson.cyberhive.common.utils.NaniteConversionRate;
+import somdudewillson.cyberhive.common.utils.NaniteConversionRate.NaniteUnit;
 
 public class NaniteConvertEffect extends MobEffect {
 //	private ResourceLocation icon;
@@ -33,7 +35,10 @@ public class NaniteConvertEffect extends MobEffect {
         			CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState()
         			.setValue(PressurizedNaniteGooBlock.DENSITY, 
         					(int)Math.min(
-        							Math.ceil(pLivingEntity.getMaxHealth()/8),
+        							Math.ceil(NaniteConversionRate.convertHealthToNanites(
+        									pLivingEntity.getMaxHealth(), 
+        									NaniteUnit.COMPRESSED_NANITE_LAYERS, 
+        									0.7)),
         							PressurizedNaniteGooBlock.MAX_DENSITY)));
         }
     }

@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -35,9 +37,12 @@ import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
 import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
+import somdudewillson.cyberhive.common.utils.NaniteConversionRate;
+import somdudewillson.cyberhive.common.utils.NaniteConversionRate.NaniteUnit;
 
 public class RawNaniteGooBlock extends Block {
 	public static final int MAX_HEIGHT = 8;
+	public static final int SELF_SUPPORT_LAYERS = MAX_HEIGHT / 2;
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, MAX_HEIGHT);
 	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
 	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() }; 
@@ -56,7 +61,7 @@ public class RawNaniteGooBlock extends Block {
 	public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
 		switch (pType) {
 		case LAND:
-			return pState.getValue(LAYERS) < MAX_HEIGHT / 2;
+			return pState.getValue(LAYERS) < SELF_SUPPORT_LAYERS;
 		case WATER:
 		case AIR:
 		default:
@@ -70,7 +75,11 @@ public class RawNaniteGooBlock extends Block {
 	@Override
 	public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos,
 			CollisionContext pContext) {
-		return SHAPE_BY_LAYER[pState.getValue(LAYERS) - 1];
+		if (pState.getValue(LAYERS)>=SELF_SUPPORT_LAYERS || pLevel.getFluidState(pPos.below()).isEmpty()) {
+			return SHAPE_BY_LAYER[pState.getValue(LAYERS)-1];
+		} else {
+			return SHAPE_BY_LAYER[0];
+		}
 	}
 	@Override
 	public VoxelShape getBlockSupportShape(BlockState pState, BlockGetter pReader, BlockPos pPos) {
@@ -97,6 +106,12 @@ public class RawNaniteGooBlock extends Block {
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		if (pLevel.isClientSide) { return; }
 		if (!pLevel.isAreaLoaded(pPos, 1)) { return; } // Prevent loading unloaded chunks with block update
+		
+		// Consume food items
+		if ( ((pLevel.getGameTime()/tickRate(pLevel)+pPos.asLong()) & 7) == 0 ) {
+			boolean halt = tryConsumeFood(pState, pLevel, pPos, pRand);
+			if (halt) { return; }
+		}
 
 		Tuple<BlockPos, BlockState> newTarget = tryFall(pState, pLevel, pPos);
 		pPos = newTarget.getA();
@@ -119,6 +134,59 @@ public class RawNaniteGooBlock extends Block {
 			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
 		}
     }
+
+	private boolean tryConsumeFood(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
+		VoxelShape shape = getShape(pState, pLevel, pPos, null);
+		double addedLayers = pLevel.getEntitiesOfClass( ItemEntity.class, shape.bounds().move(pPos.getCenter()).inflate(0.2) )
+			.stream()
+			.map(itemEntity->new Tuple<>(itemEntity, itemEntity.getItem()))
+			.filter(itemEntityTuple->itemEntityTuple.getB().isEdible())
+			.mapToDouble(itemEntityTuple->{
+				itemEntityTuple.getA().kill();
+				return NaniteConversionRate.convertFoodToNanites(
+						itemEntityTuple.getB().getFoodProperties(null), 
+						NaniteUnit.NANITE_LAYERS, 
+						0.6*itemEntityTuple.getB().getCount());
+			})
+			.sum();
+		if (addedLayers <= 0) { return false; }
+		
+		int compressedLayers = (int) NaniteUnit.NANITE_LAYERS.convertTo(pState.getValue(LAYERS)+addedLayers, NaniteUnit.COMPRESSED_NANITE_LAYERS);
+		compressedLayers--;
+		if (compressedLayers > 0) {
+			compressedLayers = Math.min(compressedLayers, PressurizedNaniteGooBlock.MAX_DENSITY);
+			pLevel.setBlockAndUpdate(
+					pPos, 
+					CyberBlocks.PRESSURIZED_NANITE_GOO.get()
+						.defaultBlockState()
+						.setValue(PressurizedNaniteGooBlock.DENSITY, compressedLayers)
+					);
+			return true;
+		}
+		
+		int depth = 0;
+		BlockPos fillPos = pPos;
+		int roundedAddedLayers = (int) Math.floor(addedLayers+pRand.nextFloat()*0.99);
+		while (roundedAddedLayers > 0 && depth<5) {
+			BlockState fillState = pLevel.getBlockState(fillPos);
+			int filledLayers = 0;
+			if (fillState.isAir()) {
+				filledLayers = Math.min(MAX_HEIGHT, roundedAddedLayers);
+				pLevel.setBlockAndUpdate(fillPos, defaultBlockState().setValue(LAYERS, filledLayers));
+			} else if (fillState.is(CyberBlocks.RAW_NANITE_GOO.get())) {
+				filledLayers = Math.min(MAX_HEIGHT-fillState.getValue(LAYERS), roundedAddedLayers);
+				pLevel.setBlockAndUpdate(fillPos, fillState.setValue(LAYERS, fillState.getValue(LAYERS)+filledLayers));
+			} else {
+				return false;
+			}
+			
+			fillPos = fillPos.above();
+			depth++;
+			roundedAddedLayers -= filledLayers;
+		}
+		
+		return false;
+	}
 	
 	private int spread(BlockState pState, ServerLevel pLevel, RandomSource pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
 		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
@@ -126,25 +194,33 @@ public class RawNaniteGooBlock extends Block {
 			BlockState adjState = adjStates[adjIdx];
 			if (layers<=1) { continue; }
 			if (adjIdx>3) { continue; }
-			
-			if (pLevel.isEmptyBlock(adjPos)) {
-				BlockState newState = pState.getBlock().defaultBlockState().setValue(LAYERS, 1);
-				pLevel.setBlockAndUpdate(adjPos, newState);
-				tryFall(newState, pLevel, adjPos);
-				layers--;
-				continue;
-			}
-			
 			Block adjBlock = adjState.getBlock();
+			
 			if (adjBlock == CyberBlocks.RAW_NANITE_GOO.get()) {
 				int adjLayers = adjState.getValue(LAYERS);
-				if (adjLayers<8 && layers-adjLayers+pRand.nextInt(2)>1) {
+				if (adjLayers<8 && layers-adjLayers+(pRand.nextFloat()-0.99)>1) {
 					BlockState newState = adjState.setValue(LAYERS, adjLayers+1);
 					pLevel.setBlockAndUpdate(adjPos, newState);
 					tryFall(newState, pLevel, adjPos);
 					layers--;
 					continue;
 				}
+				continue;
+			}
+			
+			boolean generateNewBlock = false;
+			if (adjState.isAir()) {
+				generateNewBlock = true;
+			} else if (adjState.canBeReplaced(Fluids.FLOWING_LAVA)) {
+				pLevel.destroyBlock(adjPos, true);
+				generateNewBlock = true;
+			}
+			if (generateNewBlock) {
+				BlockState newState = pState.getBlock().defaultBlockState().setValue(LAYERS, 1);
+				pLevel.setBlockAndUpdate(adjPos, newState);
+				tryFall(newState, pLevel, adjPos);
+				layers--;
+				continue;
 			}
 		}
 		
@@ -201,7 +277,7 @@ public class RawNaniteGooBlock extends Block {
 			}
 			
 			BlockState fallState = worldIn.getBlockState(fallPos);
-			if (fallState.getBlock() == CyberBlocks.RAW_NANITE_GOO.get()) {
+			if (fallState.is(CyberBlocks.RAW_NANITE_GOO.get())) {
 				if (fallState.getValue(LAYERS)>=MAX_HEIGHT) { continue; }
 				
 				int targetLayers = fallState.getValue(LAYERS);

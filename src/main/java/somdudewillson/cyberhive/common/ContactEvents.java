@@ -18,29 +18,42 @@ public class ContactEvents {
 		LivingEntity livingEntity = event.getEntity();
 		Level world = livingEntity.level();
 		if (world.isClientSide()) { return; }
-		if (!CyberPotions.NANITE_CONVERT.isPresent()) { return; }
 		if ((world.getGameTime()+livingEntity.getId() & 15) != 0) { return; }
 		
 		MobEffectInstance existingNaniteEffect = livingEntity.getEffect(CyberPotions.NANITE_CONVERT.get());
 		if (existingNaniteEffect!=null && existingNaniteEffect.getDuration()>=20) {
 			return;
 		}
-			
-		if (!doContactEffects(livingEntity,world,livingEntity.blockPosition())
-				&& livingEntity.onGround()) {
-			doContactEffects(livingEntity,world,livingEntity.blockPosition().below());
+		
+		boolean contactTriggered = false;
+		for (int i=0;!contactTriggered&&i<livingEntity.getBbHeight();i++) {
+			contactTriggered |= doLivingContactEffects(livingEntity, world, livingEntity.blockPosition().above(i));
+		}
+		if (!contactTriggered && livingEntity.onGround()) {
+			doLivingContactEffects(livingEntity,world,livingEntity.blockPosition().below());
 		}
 	}
 	
-	private boolean doContactEffects(LivingEntity livingEntity, Level worldIn, BlockPos pos) {
-		BlockState stateAtPos = worldIn.getBlockState(pos);
-		Block blockAtPos = stateAtPos.getBlock();
-		
+	private boolean checkEntityCollision(LivingEntity livingEntity, Level worldIn, BlockState stateAtPos, BlockPos pos) {		
 		if (stateAtPos.isAir()) {
 			return false;
 		}
-		if (stateAtPos.getCollisionShape(worldIn, pos).isEmpty()
-				|| stateAtPos.getCollisionShape(worldIn, pos).bounds().maxY+pos.getY()+0.1<livingEntity.position().y) {
+		double maxBoundsY = 0;
+		if (!stateAtPos.getCollisionShape(worldIn, pos).isEmpty()) {
+			maxBoundsY = stateAtPos.getCollisionShape(worldIn, pos).bounds().maxY;
+		}
+		if (maxBoundsY+pos.getY()+0.1<livingEntity.position().y) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean doLivingContactEffects(LivingEntity livingEntity, Level worldIn, BlockPos pos) {
+		BlockState stateAtPos = worldIn.getBlockState(pos);
+		Block blockAtPos = stateAtPos.getBlock();
+		
+		if (!checkEntityCollision(livingEntity, worldIn, stateAtPos, pos)) {
 			return false;
 		}
 		
