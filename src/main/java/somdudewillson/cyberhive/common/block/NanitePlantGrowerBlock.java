@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.tileentity.NanitePlantGrowerTileEntity;
-import somdudewillson.cyberhive.common.tileentity.NaniteRootTileEntity;
 
 public class NanitePlantGrowerBlock extends Block implements EntityBlock {
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
