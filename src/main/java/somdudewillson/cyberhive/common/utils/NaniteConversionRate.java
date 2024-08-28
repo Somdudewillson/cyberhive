@@ -43,16 +43,19 @@ public class NaniteConversionRate {
 				Map.entry(MobEffects.POISON, -0.3),
 				Map.entry(MobEffects.HUNGER, -0.5),
 				Map.entry(MobEffects.WITHER, -0.8),
-				Map.entry(MobEffects.SATURATION, 1.5),
-				Map.entry(MobEffects.REGENERATION, 0.5),
-				Map.entry(MobEffects.ABSORPTION, 0.2)
+				Map.entry(MobEffects.SATURATION, 4.0),
+				Map.entry(MobEffects.REGENERATION, 3.5),
+				Map.entry(MobEffects.ABSORPTION, 2.0)
 			);
 	
 	public static double convertFoodToNanites(FoodProperties foodProperties) {
 		double foodScore = foodProperties.getNutrition()*(foodProperties.getSaturationModifier()/0.65d);
 		for (Pair<MobEffectInstance, Float> foodEffect : foodProperties.getEffects()) {
 			if (EFFECT_MULT_MAP.containsKey(foodEffect.getFirst().getEffect())) {
-				foodScore *= 1+( EFFECT_MULT_MAP.get(foodEffect.getFirst().getEffect())*foodEffect.getSecond() );
+				double foodMult = EFFECT_MULT_MAP.get(foodEffect.getFirst().getEffect());
+				foodMult = Math.pow(foodMult, foodEffect.getFirst().getAmplifier()+1);
+				foodMult *= foodEffect.getSecond();
+				foodScore *= 1+foodMult;
 			}
 		}
 		return foodScore*FOOD_CONVERSION_RATE;
