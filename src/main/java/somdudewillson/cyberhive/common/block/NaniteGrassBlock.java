@@ -18,8 +18,10 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.Vec3;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.utils.GenericUtils;
+import somdudewillson.cyberhive.common.utils.NaniteSharedEffects;
 
 public class NaniteGrassBlock extends Block {
 	public static final int MAX_STRENGTH = 5;
@@ -65,6 +67,8 @@ public class NaniteGrassBlock extends Block {
 		float strengthReductionTarget = consumedPlant?0.5f:0.9f;
 		if (strengthReductionRoll<strengthReductionTarget) {
 			newStrength--;
+		} else if (consumedPlant) {
+			spawnConsumptionWasteCloud(pLevel, targetPos.above().getCenter());
 		}
 		
 		BlockState newNaniteGrassState = sourceState.getBlock().defaultBlockState()
@@ -89,6 +93,8 @@ public class NaniteGrassBlock extends Block {
 			
 			if (pState.getValue(SPREAD_STRENGTH) < MAX_STRENGTH/2) {
 				pState.setValue(SPREAD_STRENGTH, pState.getValue(SPREAD_STRENGTH)+1);
+			} else {
+				spawnConsumptionWasteCloud(pLevel, pPos.above().getCenter());
 			}
 		}
 	}
@@ -124,5 +130,12 @@ public class NaniteGrassBlock extends Block {
 				placeNaniteGrass(pState, pLevel, adjArray[i], pRandom);
 			}
 		}
+	}
+	
+	private static void spawnConsumptionWasteCloud(ServerLevel pLevel, Vec3 targetPos) {
+		NaniteSharedEffects.makeNaniteCloud(
+				pLevel, targetPos, 
+				2, -0.5f, 10, 20*3, 
+				null, 80, 0);
 	}
 }
