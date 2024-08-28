@@ -14,14 +14,11 @@ import somdudewillson.cyberhive.common.utils.NaniteConversionRate;
 import somdudewillson.cyberhive.common.utils.NaniteConversionRate.NaniteUnit;
 
 public class NaniteConvertEffect extends MobEffect {
-//	private ResourceLocation icon;
 
 	public NaniteConvertEffect() {
 		super(MobEffectCategory.HARMFUL, Color.gray.getRGB());
-
+		
 		// setPotionName(CyberhiveMod.MODID + ".effect." + getRegistryName().getPath());
-//		this.icon = new ResourceLocation(CyberhiveMod.MODID,
-//				"textures/gui/potion/"+getRegistryName().getPath()+".png");
 	}
 	
 	@Override
@@ -53,20 +50,4 @@ public class NaniteConvertEffect extends MobEffect {
     public List<ItemStack> getCurativeItems() {
         return new ArrayList<ItemStack>();
     }
-
-//	@Override
-//	@OnlyIn(Dist.CLIENT)
-//	public void renderHUDEffect(EffectInstance effect, AbstractGui gui, MatrixStack mStack, int x, int y, float z, float alpha)
-//	{
-//		mc.getTextureManager().bindTexture(icon);
-//		gui.drawModalRectWithCustomSizedTexture(x + 3, y + 3, 0, 0, 18, 18, 18, 18);
-//	}
-//
-//	@Override
-//	@OnlyIn(Dist.CLIENT)
-//	public void renderInventoryEffect(EffectInstance effect, DisplayEffectsScreen<?> gui, MatrixStack mStack, int x, int y, float z)
-//	{
-//		mc.getTextureManager().bindTexture(icon);
-//		gui.drawModalRectWithCustomSizedTexture(x + 6, y + 7, 0, 0, 18, 18, 18, 18);
-//	}
 }
