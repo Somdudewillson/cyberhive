@@ -1,0 +1,8 @@
+{
+  "values": [
+    {
+      "id": "cyberhive:nanite_consume_internal",
+      "required": false
+    }
+  ]
+}

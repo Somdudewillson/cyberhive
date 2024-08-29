@@ -18,6 +18,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import somdudewillson.cyberhive.common.ContactEvents;
 import somdudewillson.cyberhive.common.CyberBlocks;
+import somdudewillson.cyberhive.common.CyberDamageTypes;
 import somdudewillson.cyberhive.common.CyberEntities;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.CyberPotions;
@@ -46,6 +47,7 @@ public class CyberhiveMod {
 			Class.forName(CyberItems.class.getName());
 			Class.forName(CyberPotions.class.getName());
 			Class.forName(CyberEntities.class.getName());
+			Class.forName(CyberDamageTypes.class.getName());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
