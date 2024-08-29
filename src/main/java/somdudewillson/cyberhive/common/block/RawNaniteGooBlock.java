@@ -1,6 +1,6 @@
 package somdudewillson.cyberhive.common.block;
 
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -34,14 +34,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 import somdudewillson.cyberhive.common.CyberBlocks;
-import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
 import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
-import somdudewillson.cyberhive.common.utils.NaniteConversionRate;
-import somdudewillson.cyberhive.common.utils.NaniteConversionRate.NaniteUnit;
+import somdudewillson.cyberhive.common.utils.NaniteConversionUtils;
 
 public class RawNaniteGooBlock extends Block {
+	public static final int NANITES_PER_LAYER = 9;
 	public static final int MAX_HEIGHT = 8;
+	public static final int MAX_NANITES = NANITES_PER_LAYER*MAX_HEIGHT;
 	public static final int SELF_SUPPORT_LAYERS = MAX_HEIGHT / 2;
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, MAX_HEIGHT);
 	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
@@ -97,9 +97,7 @@ public class RawNaniteGooBlock extends Block {
     
     @Override
     public List<ItemStack> getDrops(BlockState pState, LootParams.Builder pBuilder) {
-    	LinkedList<ItemStack> dropList = new LinkedList<ItemStack>();
-    	dropList.add( new ItemStack(CyberItems.NANITE_LUMP.get(), pState.getValue(LAYERS)) );
-    	return dropList;
+    	return Arrays.asList(NaniteConversionUtils.convertNanitesToItemStacks(pState.getValue(LAYERS)*NANITES_PER_LAYER));
     }
 
 	@Override
@@ -107,10 +105,18 @@ public class RawNaniteGooBlock extends Block {
 		if (pLevel.isClientSide) { return; }
 		if (!pLevel.isAreaLoaded(pPos, 1)) { return; } // Prevent loading unloaded chunks with block update
 		
+		boolean shouldKeepTicking = innerTick(pState, pLevel, pPos, pRand);
+		if (shouldKeepTicking) {
+	    	pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(
+	    			this, pPos, this.tickRate(pLevel), TickPriority.LOW, 0));
+		}
+    }
+	
+	private boolean innerTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		// Consume food items
 		if ( ((pLevel.getGameTime()/tickRate(pLevel)+pPos.asLong()) & 7) == 0 ) {
-			boolean halt = tryConsumeFood(pState, pLevel, pPos, pRand);
-			if (halt) { return; }
+			boolean halt = tryConsumeItems(pState, pLevel, pPos, pRand);
+			if (halt) { return false; }
 		}
 
 		Tuple<BlockPos, BlockState> newTarget = tryFall(pState, pLevel, pPos);
@@ -128,45 +134,40 @@ public class RawNaniteGooBlock extends Block {
 		
 		if (layers>0) {
 			pLevel.setBlockAndUpdate(pPos, pState.setValue(LAYERS, layers));
-	    	pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(
-	    			this, pPos, this.tickRate(pLevel), TickPriority.LOW, 0));
 		} else {
 			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+			return false;
 		}
-    }
+		
+		return true;
+	}
 
-	private boolean tryConsumeFood(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
+	private boolean tryConsumeItems(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		VoxelShape shape = getShape(pState, pLevel, pPos, null);
-		double addedLayers = pLevel.getEntitiesOfClass( ItemEntity.class, shape.bounds().move(pPos.getCenter()).inflate(0.15, 0.334, 0.15) )
+		double addedNanites = pLevel.getEntitiesOfClass( ItemEntity.class, shape.bounds().move(pPos.getCenter()).inflate(0.15, 0.334, 0.15) )
 			.stream()
 			.map(itemEntity->new Tuple<>(itemEntity, itemEntity.getItem()))
-			.filter(itemEntityTuple->itemEntityTuple.getB().isEdible())
+			.map(itemEntityTuple->new Tuple<>(
+					itemEntityTuple.getA(), 
+					NaniteConversionUtils.convertItemStackToNanites(itemEntityTuple.getA().getItem())*0.6 ))
+			.filter(itemEntityTuple->itemEntityTuple.getB()>0)
 			.mapToDouble(itemEntityTuple->{
 				itemEntityTuple.getA().kill();
-				return NaniteConversionRate.convertFoodToNanites(
-						itemEntityTuple.getB().getFoodProperties(null), 
-						NaniteUnit.NANITE_LAYERS, 
-						0.6*itemEntityTuple.getB().getCount());
+				return itemEntityTuple.getB();
 			})
 			.sum();
-		if (addedLayers <= 0) { return false; }
+		if (addedNanites <= 0) { return false; }
 		
-		int compressedLayers = (int) NaniteUnit.NANITE_LAYERS.convertTo(pState.getValue(LAYERS)+addedLayers, NaniteUnit.COMPRESSED_NANITE_LAYERS);
-		compressedLayers--;
-		if (compressedLayers > 0) {
-			compressedLayers = Math.min(compressedLayers, PressurizedNaniteGooBlock.MAX_DENSITY);
-			pLevel.setBlockAndUpdate(
-					pPos, 
-					CyberBlocks.PRESSURIZED_NANITE_GOO.get()
-						.defaultBlockState()
-						.setValue(PressurizedNaniteGooBlock.DENSITY, compressedLayers)
-					);
+		if (addedNanites > MAX_NANITES-(pState.getValue(LAYERS)*NANITES_PER_LAYER) ) {
+			pLevel.setBlockAndUpdate(pPos, CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState());
+			PressurizedNaniteGooBlock.setNaniteQuantity(pLevel, pPos, (short)Math.round(addedNanites));
 			return true;
 		}
 		
 		int depth = 0;
 		BlockPos fillPos = pPos;
-		int roundedAddedLayers = (int) Math.floor(addedLayers+pRand.nextFloat()*0.99);
+		int roundedAddedLayers = (int) Math.floor((addedNanites/NANITES_PER_LAYER)+pRand.nextFloat()*0.99);
+		boolean changedSelf = false;
 		while (roundedAddedLayers > 0 && depth<5) {
 			BlockState fillState = pLevel.getBlockState(fillPos);
 			int filledLayers = 0;
@@ -176,8 +177,9 @@ public class RawNaniteGooBlock extends Block {
 			} else if (fillState.is(CyberBlocks.RAW_NANITE_GOO.get())) {
 				filledLayers = Math.min(MAX_HEIGHT-fillState.getValue(LAYERS), roundedAddedLayers);
 				pLevel.setBlockAndUpdate(fillPos, fillState.setValue(LAYERS, fillState.getValue(LAYERS)+filledLayers));
+				if (fillPos.equals(pPos)) { changedSelf = true; }
 			} else {
-				return false;
+				break;
 			}
 			
 			fillPos = fillPos.above();
@@ -185,7 +187,7 @@ public class RawNaniteGooBlock extends Block {
 			roundedAddedLayers -= filledLayers;
 		}
 		
-		return false;
+		return changedSelf;
 	}
 	
 	private int spread(BlockState pState, ServerLevel pLevel, RandomSource pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
@@ -211,7 +213,7 @@ public class RawNaniteGooBlock extends Block {
 			boolean generateNewBlock = false;
 			if (adjState.isAir()) {
 				generateNewBlock = true;
-			} else if (adjState.canBeReplaced(Fluids.FLOWING_LAVA)) {
+			} else if (adjState.getFluidState().isEmpty() && adjState.canBeReplaced(Fluids.FLOWING_LAVA)) {
 				pLevel.destroyBlock(adjPos, true);
 				generateNewBlock = true;
 			}

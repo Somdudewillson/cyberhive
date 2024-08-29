@@ -21,6 +21,7 @@ import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 import somdudewillson.cyberhive.common.tileentity.NanitePlantGrowerTileEntity;
 import somdudewillson.cyberhive.common.tileentity.NaniteRootTileEntity;
+import somdudewillson.cyberhive.common.tileentity.PressurizedNaniteGooTileEntity;
 
 
 public class CyberBlocks {
@@ -36,6 +37,7 @@ public class CyberBlocks {
 	public static final RegistryObject<Block> NANITE_PLANT_CORE = registerBlock("nanite_plant_core", NanitePlantCoreBlock::new);
 	
 	//Tile Entity Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	public static final RegistryObject<BlockEntityType<PressurizedNaniteGooTileEntity>> PRESSURIZED_NANITE_GOO_TET = makeTileEntityType("pressurized_nanite_goo_tiletype", PressurizedNaniteGooTileEntity::new, PRESSURIZED_NANITE_GOO);
 	public static final RegistryObject<BlockEntityType<NaniteRootTileEntity>> NANITE_ROOT_TET = makeTileEntityType("nanite_root_tiletype", NaniteRootTileEntity::new, NANITE_ROOT);
 	public static final RegistryObject<BlockEntityType<NanitePlantGrowerTileEntity>> NANITE_PLANT_GROWER_TET = makeTileEntityType("nanite_plant_grower_tiletype", NanitePlantGrowerTileEntity::new, NANITE_PLANT_GROWER);
 	

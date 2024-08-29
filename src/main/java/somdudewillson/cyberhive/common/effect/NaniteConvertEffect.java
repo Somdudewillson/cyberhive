@@ -10,8 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
-import somdudewillson.cyberhive.common.utils.NaniteConversionRate;
-import somdudewillson.cyberhive.common.utils.NaniteConversionRate.NaniteUnit;
+import somdudewillson.cyberhive.common.utils.NaniteConversionUtils;
 
 public class NaniteConvertEffect extends MobEffect {
 
@@ -28,15 +27,12 @@ public class NaniteConvertEffect extends MobEffect {
         if (!pLivingEntity.isAlive()
         		&& !pLivingEntity.level().isClientSide) {
         	pLivingEntity.level().setBlockAndUpdate(
-        			pLivingEntity.blockPosition(),
-        			CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState()
-        			.setValue(PressurizedNaniteGooBlock.DENSITY, 
-        					(int)Math.min(
-        							Math.ceil(NaniteConversionRate.convertHealthToNanites(
-        									pLivingEntity.getMaxHealth(), 
-        									NaniteUnit.COMPRESSED_NANITE_LAYERS, 
-        									0.7)),
-        							PressurizedNaniteGooBlock.MAX_DENSITY)));
+        			pLivingEntity.blockPosition(), 
+        			CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState());
+        	PressurizedNaniteGooBlock.setNaniteQuantity(
+        			pLivingEntity.level(), 
+        			pLivingEntity.blockPosition(), 
+        			(short) Math.round(NaniteConversionUtils.convertHealthToNanites(pLivingEntity.getMaxHealth())) );
         }
     }
 
