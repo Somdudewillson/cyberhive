@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "cyberhive:block/nanite_log_top",
-    "side": "cyberhive:block/nanite_log"
-  }
-}
