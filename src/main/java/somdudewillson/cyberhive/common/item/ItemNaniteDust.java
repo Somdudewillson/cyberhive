@@ -3,9 +3,9 @@ package somdudewillson.cyberhive.common.item;
 
 import net.minecraft.world.item.Item;
 
-public class ItemNaniteLump extends AbstractNaniteStorageItem {
+public class ItemNaniteDust extends AbstractNaniteStorageItem {
 	
-	public ItemNaniteLump() {
+	public ItemNaniteDust() {
 		super((new Item.Properties()).stacksTo(64));
 	}
 
@@ -16,6 +16,6 @@ public class ItemNaniteLump extends AbstractNaniteStorageItem {
 
 	@Override
 	public int getNanitesInItem() {
-		return 9;
+		return 1;
 	}
 }
