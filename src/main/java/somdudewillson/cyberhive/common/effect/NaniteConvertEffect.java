@@ -1,13 +1,14 @@
 package somdudewillson.cyberhive.common.effect;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberDamageTypes;
 import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
@@ -21,18 +22,27 @@ public class NaniteConvertEffect extends MobEffect {
 	
 	@Override
     public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
-		pLivingEntity.hurt(CyberDamageTypes.makeSourceInternalNanites(pLivingEntity.level()), 1.0F);
+		pLivingEntity.hurt(CyberDamageTypes.makeSourceInternalNanites(pLivingEntity.level()), 2F);
 		
         if (!pLivingEntity.isAlive()
-        		&& !pLivingEntity.level().isClientSide) {
-        	pLivingEntity.level().setBlockAndUpdate(
-        			pLivingEntity.blockPosition(), 
-        			CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState());
+        		&& !pLivingEntity.level().isClientSide()) {
+        	Optional<BlockPos> spawnPos = BlockPos.findClosestMatch(
+        			pLivingEntity.blockPosition(), 3, 15, 
+        			p -> {
+        				BlockState testState = pLivingEntity.level().getBlockState(p);
+        				return testState.canBeReplaced(Fluids.FLOWING_WATER) && testState.getFluidState().isEmpty();
+        			});
         	
-        	PressurizedNaniteGooBlock.setNaniteQuantity(
-        			pLivingEntity.level(), 
-        			pLivingEntity.blockPosition(), 
-        			(short) Math.round(NaniteConversionUtils.convertHealthToNanites(pLivingEntity.getMaxHealth())) );
+        	if (spawnPos.isPresent()) {
+	        	pLivingEntity.level().setBlockAndUpdate(
+	        			spawnPos.get(), 
+	        			CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState());
+	        	
+	        	PressurizedNaniteGooBlock.setNaniteQuantity(
+	        			pLivingEntity.level(), 
+	        			spawnPos.get(), 
+	        			(short) Math.round(NaniteConversionUtils.convertHealthToNanites(pLivingEntity.getMaxHealth())) );
+        	}
         }
     }
 
@@ -41,9 +51,4 @@ public class NaniteConvertEffect extends MobEffect {
 		int interval = 15>>pAmplifier;
 		return (pDuration & interval) == 0;
 	}
-	
-	@Override
-    public List<ItemStack> getCurativeItems() {
-        return new ArrayList<ItemStack>();
-    }
 }

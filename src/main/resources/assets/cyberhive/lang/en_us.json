@@ -8,5 +8,12 @@
 "tile.cyberhive.pressurized_nanite_goo": "Pressurized Nanite Goo",
 "block.cyberhive.nanite_grass": "Nanite Grass",
 "block.cyberhive.nanite_root": "Nanite Root",
-"itemGroup.cyberhive": "Cyber Hive Tab"
+
+"itemGroup.cyberhive": "Cyber Hive Tab",
+
+"effect.cyberhive.nanite_convert_effect": "Internal Nanites",
+"effect.cyberhive.nanite_coat_effect": "Coated in Nanites",
+
+"death.attack.nanite_consume_internal": "%1$s was molecularly shredded from the inside out",
+"death.attack.nanite_consume_external": "%1$s was disassembled at the molecular level"
 }

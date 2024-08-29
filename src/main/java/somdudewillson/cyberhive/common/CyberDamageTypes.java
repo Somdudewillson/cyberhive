@@ -21,7 +21,8 @@ import somdudewillson.cyberhive.CyberhiveMod;
 public class CyberDamageTypes {
 	private static final HashMap<ResourceKey<DamageType>, DamageType> DAMAGE_KEY_TO_TYPE_MAP = new HashMap<>();
 
-	public static final ResourceKey<DamageType> NANITE_CONSUME_DT = registerDamageType("nanite_consume_internal", new DamageType("nanite_consume_internal", DamageScaling.ALWAYS, 0.0F));
+	public static final ResourceKey<DamageType> NANITE_CONSUME_DT = registerDamageType("nanite_consume_internal", new DamageType("nanite_consume_internal", DamageScaling.ALWAYS, 0.1F));
+	public static final ResourceKey<DamageType> NANITE_COAT_DT = registerDamageType("nanite_consume_external", new DamageType("nanite_consume_external", DamageScaling.ALWAYS, 0.0F));
 
 	@Synchronized("DAMAGE_KEY_TO_TYPE_MAP")
 	private static ResourceKey<DamageType> registerDamageType(String id, DamageType damageType) {
@@ -53,5 +54,12 @@ public class CyberDamageTypes {
 	}
 	public static DamageSource makeSourceInternalNanites(LevelAccessor level, @Nullable Entity pEntity) {
 		return makeSource(level, NANITE_CONSUME_DT, pEntity);
+	}
+	
+	public static DamageSource makeSourceExternalNanites(LevelAccessor level) {
+		return makeSourceExternalNanites(level, null);
+	}
+	public static DamageSource makeSourceExternalNanites(LevelAccessor level, @Nullable Entity pEntity) {
+		return makeSource(level, NANITE_COAT_DT, pEntity);
 	}
 }

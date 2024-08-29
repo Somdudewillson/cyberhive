@@ -1,5 +1,6 @@
 package somdudewillson.cyberhive.common.utils;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +9,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import it.unimi.dsi.fastutil.ints.Int2IntFunction;
+import lombok.AccessLevel;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -15,8 +19,11 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import somdudewillson.cyberhive.CyberhiveMod;
 
 public class GenericUtils {
 	public static <T> HashMap<T, Integer> arrayToInverseMap(T[] array) {
@@ -103,6 +110,23 @@ public class GenericUtils {
 				
 				map.put(key, value);
 			} catch (ClassCastException e) { }
+		}
+	}
+	
+	@Getter(value = AccessLevel.PRIVATE, lazy = true)
+	private static final Field mobEffectDurationField = ObfuscationReflectionHelper.findField(MobEffectInstance.class, "duration");
+	public static void mapAndUpdateDuration(MobEffectInstance effectInstance, Int2IntFunction mapper) {
+		
+		Field durationField = GenericUtils.getMobEffectDurationField();
+		int mappedDuration = effectInstance.mapDuration(mapper);
+		if (durationField.canAccess(effectInstance) || durationField.trySetAccessible()) {
+			try {
+				durationField.setInt(effectInstance, mappedDuration);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				CyberhiveMod.LOGGER.error("Failed to update MobEffectInstanceDuration", e);
+			}
+		} else {
+			CyberhiveMod.LOGGER.error("Unable to update MobEffectInstanceDuration");
 		}
 	}
 }

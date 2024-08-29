@@ -1,5 +1,7 @@
 package somdudewillson.cyberhive.common;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
+import somdudewillson.cyberhive.common.effect.NaniteCoatedEffect;
 
 public class ContactEvents {
 	
@@ -20,17 +23,17 @@ public class ContactEvents {
 		if (world.isClientSide()) { return; }
 		if ((world.getGameTime()+livingEntity.getId() & 15) != 0) { return; }
 		
-		MobEffectInstance existingNaniteEffect = livingEntity.getEffect(CyberPotions.NANITE_CONVERT.get());
-		if (existingNaniteEffect!=null && existingNaniteEffect.getDuration()>=20) {
+		MobEffectInstance existingNaniteEffect = livingEntity.getEffect(CyberPotions.NANITE_COAT.get());
+		if (existingNaniteEffect!=null && existingNaniteEffect.getDuration()>=NaniteCoatedEffect.MAX_DURATION) {
 			return;
 		}
 		
 		boolean contactTriggered = false;
-		for (int i=0;!contactTriggered&&i<livingEntity.getBbHeight();i++) {
-			contactTriggered |= doLivingContactEffects(livingEntity, world, livingEntity.blockPosition().above(i));
+		for (int i=0;!contactTriggered && i<livingEntity.getBbHeight();i++) {
+			contactTriggered |= doLivingContactEffects(livingEntity, world, livingEntity.blockPosition().above(i), existingNaniteEffect);
 		}
 		if (!contactTriggered && livingEntity.onGround()) {
-			doLivingContactEffects(livingEntity,world,livingEntity.blockPosition().below());
+			doLivingContactEffects(livingEntity, world, livingEntity.blockPosition().below(), existingNaniteEffect);
 		}
 	}
 	
@@ -49,7 +52,7 @@ public class ContactEvents {
 		return true;
 	}
 	
-	private boolean doLivingContactEffects(LivingEntity livingEntity, Level worldIn, BlockPos pos) {
+	private boolean doLivingContactEffects(LivingEntity livingEntity, Level worldIn, BlockPos pos, @Nullable MobEffectInstance existingNaniteEffect) {
 		BlockState stateAtPos = worldIn.getBlockState(pos);
 		Block blockAtPos = stateAtPos.getBlock();
 		
@@ -58,7 +61,7 @@ public class ContactEvents {
 		}
 		
 		if (blockAtPos == CyberBlocks.RAW_NANITE_GOO.get()) {
-			livingEntity.addEffect(new MobEffectInstance(CyberPotions.NANITE_CONVERT.get(), 120));
+			NaniteCoatedEffect.addNanitesToCoat(livingEntity, RawNaniteGooBlock.NANITES_PER_LAYER);
 			
 			int layers = stateAtPos.getValue(RawNaniteGooBlock.LAYERS);
 			layers--;
@@ -70,11 +73,11 @@ public class ContactEvents {
 			return true;
 		}
 		if (blockAtPos == CyberBlocks.PRESSURIZED_NANITE_GOO.get()) {
-			livingEntity.addEffect(new MobEffectInstance(CyberPotions.NANITE_CONVERT.get(), 120));
+			NaniteCoatedEffect.addNanitesToCoat(livingEntity, RawNaniteGooBlock.NANITES_PER_LAYER);
 			return true;
 		}
 		if (blockAtPos == CyberBlocks.NANITE_GRASS.get()) {
-			livingEntity.addEffect(new MobEffectInstance(CyberPotions.NANITE_CONVERT.get(), 40));
+			NaniteCoatedEffect.addNanitesToCoat(livingEntity, RawNaniteGooBlock.NANITES_PER_LAYER/4d);
 			return true;
 		}
 		

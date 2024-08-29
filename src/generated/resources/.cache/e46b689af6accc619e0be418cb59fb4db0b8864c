@@ -1,2 +1,3 @@
-// 1.20.1	2024-08-29T09:21:32.1959045	Cyber Hive's Damage Type Data
-7f64c7cac6848363e14ee811a34c2d64cd92bfe2 data/cyberhive/damage_type/nanite_consume_internal.json
+// 1.20.1	2024-08-29T10:29:23.9262764	Cyber Hive's Damage Type Data
+d52be7a3638bc0414d5e768185cfe0cfa8a9547a data/cyberhive/damage_type/nanite_consume_external.json
+23222e0609bcff346c03f6392410baded8315e91 data/cyberhive/damage_type/nanite_consume_internal.json
