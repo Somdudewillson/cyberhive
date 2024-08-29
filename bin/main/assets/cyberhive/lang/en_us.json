@@ -1,5 +1,7 @@
 {
-"item.cyberhive.nanite_lump": "Nanite Lump",
+"item.cyberhive.nanite_dust": "Nanite Dust",
+"item.cyberhive.nanite_pile": "Nanite Pile",
+"item.cyberhive.nanite_clump": "Nanite Clump",
 "block.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
 "tile.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
 "block.cyberhive.pressurized_nanite_goo": "Pressurized Nanite Goo",

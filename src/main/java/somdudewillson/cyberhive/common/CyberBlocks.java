@@ -49,8 +49,8 @@ public class CyberBlocks {
 		if (makeItemBlock) {
 			RegistryObject<BlockItem> itemBlock = CyberhiveMod.ITEMS.register(
 					registryName, 
-					()->new BlockItem(blockRegistry.get(),new Item.Properties()));
-			CyberItems.addExtraCreativeTabItem(itemBlock);
+					()->new BlockItem(blockRegistry.get(), new Item.Properties()));
+			CyberItems.addCreativeTabItem(itemBlock);
 		}
 		return blockRegistry;
 	}

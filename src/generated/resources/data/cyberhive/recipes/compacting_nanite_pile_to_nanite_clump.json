@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "compacting",
+  "ingredients": [
+    {
+      "item": "cyberhive:nanite_pile"
+    },
+    {
+      "item": "cyberhive:nanite_pile"
+    },
+    {
+      "item": "cyberhive:nanite_pile"
+    },
+    {
+      "item": "cyberhive:nanite_pile"
+    }
+  ],
+  "result": {
+    "item": "cyberhive:nanite_clump"
+  }
+}

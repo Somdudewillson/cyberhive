@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "cyberhive:nanite_dust",
-    "cyberhive:nanite_lump"
+    "cyberhive:nanite_pile",
+    "cyberhive:nanite_clump"
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "decompacting",
+  "ingredients": [
+    {
+      "item": "cyberhive:nanite_pile"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "item": "cyberhive:nanite_dust"
+  }
+}
