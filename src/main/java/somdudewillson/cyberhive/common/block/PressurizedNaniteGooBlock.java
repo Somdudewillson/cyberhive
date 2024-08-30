@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -118,7 +119,7 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 			moveSelf(pLevel, pPos, pState, pPos.below(), belowBlockState);
 			return true;
 		}
-		if (belowBlockState.canBeReplaced(new BlockPlaceContext(pLevel, null, null, ItemStack.EMPTY, new BlockHitResult(Vec3.ZERO, Direction.UP, pPos, false)))) {
+		if (belowBlockState.canBeReplaced(Fluids.FLOWING_WATER) && belowBlockState.getFluidState().isEmpty()) {
 			pLevel.destroyBlock(pPos.below(), true);
 			moveSelf(pLevel, pPos, pState, pPos.below(), Blocks.AIR.defaultBlockState());
 			return true;

@@ -58,7 +58,6 @@ public class NaniteCoatedEffect extends MobEffect {
 		GenericUtils.mapAndUpdateDuration(pLivingEntity, effectInstance, d -> Math.min(MAX_DURATION, d+16) );
 		
 		if (washOff(pLivingEntity, effectInstance)) {
-			pLivingEntity.removeEffect(this);
 			return;
 		}
 		
@@ -83,13 +82,14 @@ public class NaniteCoatedEffect extends MobEffect {
 	
 	private boolean washOff(LivingEntity pLivingEntity, MobEffectInstance effectInstance) {
 		if (pLivingEntity.isInFluidType()) {
-			GenericUtils.mapAndUpdateDuration(pLivingEntity, effectInstance, d -> d-Math.max(20, d/10));
 			if (effectInstance.getDuration() <= 0 && pLivingEntity.level().isClientSide()) {
 				for (int i=0;i<50;i++) {
 					spawnMovingNaniteDrip((ClientLevel) pLivingEntity.level(), pLivingEntity.getBoundingBox().deflate(0.1));
 				}
 			}
-			return effectInstance.getDuration() > 0;
+			doDrip(pLivingEntity, effectInstance.getDuration()*NANITES_PER_DURATION_TICK);
+			pLivingEntity.removeEffect(this);
+			return true;
 		}
 		return false;
 	}

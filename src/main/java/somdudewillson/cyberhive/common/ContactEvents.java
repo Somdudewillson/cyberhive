@@ -23,8 +23,10 @@ public class ContactEvents {
 		if (world.isClientSide()) { return; }
 		if ((world.getGameTime()+livingEntity.getId() & 15) != 0) { return; }
 		
+		if (livingEntity.isInFluidType()) { return; }
+		
 		MobEffectInstance existingNaniteEffect = livingEntity.getEffect(CyberPotions.NANITE_COAT.get());
-		if (existingNaniteEffect!=null && existingNaniteEffect.getDuration()>=NaniteCoatedEffect.MAX_DURATION) {
+		if (existingNaniteEffect!=null && existingNaniteEffect.getDuration()>=NaniteCoatedEffect.MAX_STABLE_NANITES*NaniteCoatedEffect.DURATION_TICK_PER_NANITE) {
 			return;
 		}
 		
