@@ -3,6 +3,7 @@ package somdudewillson.cyberhive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -21,6 +22,7 @@ import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberDamageTypes;
 import somdudewillson.cyberhive.common.CyberEntities;
 import somdudewillson.cyberhive.common.CyberItems;
+import somdudewillson.cyberhive.common.CyberParticles;
 import somdudewillson.cyberhive.common.CyberPotions;
 
 @Mod(CyberhiveMod.MODID)
@@ -37,6 +39,7 @@ public class CyberhiveMod {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MODID);
+    public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, MODID);
 
     public CyberhiveMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -48,6 +51,7 @@ public class CyberhiveMod {
 			Class.forName(CyberPotions.class.getName());
 			Class.forName(CyberEntities.class.getName());
 			Class.forName(CyberDamageTypes.class.getName());
+			Class.forName(CyberParticles.class.getName());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -58,6 +62,7 @@ public class CyberhiveMod {
         CREATIVE_MODE_TABS.register(modEventBus);
         MOB_EFFECTS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
+        PARTICLE_TYPES.register(modEventBus);
         
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

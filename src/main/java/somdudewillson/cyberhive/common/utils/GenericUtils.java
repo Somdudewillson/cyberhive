@@ -20,6 +20,7 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -31,7 +32,7 @@ public class GenericUtils {
 		for (int i = 0; i < array.length; i++) {
 			result.put(array[i], i);
 		}
-		
+
 		return result;
 	}
 
@@ -47,7 +48,7 @@ public class GenericUtils {
 			array[i] = a;
 		}
 	}
-	
+
 	public static <T> void shuffleCollection(Collection<T> collection, RandomSource rng) {
 		@SuppressWarnings("unchecked")
 		T[] collectionAsArray = (T[]) collection.toArray();
@@ -73,20 +74,20 @@ public class GenericUtils {
 	public static BlockPos deserializeBlockPos(BlockPos __, NumericTag nbt) {
 		return BlockPos.of(nbt.getAsLong());
 	}
-	
+
 	public static <K extends INBTSerializable<? extends Tag>, V extends INBTSerializable<? extends Tag>> CompoundTag serializeMap(Map<K,V> map) {
 		return serializeMap(map, K::serializeNBT, V::serializeNBT);
 	}
 	public static <K, V> CompoundTag serializeMap(Map<K,V> map, 
 			Function<K, ? extends Tag> keySerializer, Function<V,? extends Tag> valueSerializer) {
 		CompoundTag nbt = new CompoundTag();
-		
+
 		int i=0;
 		for (Map.Entry<K, V> entry : map.entrySet()) {
 			nbt.put("k"+i, keySerializer.apply(entry.getKey()));
 			nbt.put("v"+i, valueSerializer.apply(entry.getValue()));
 		}
-		
+
 		return nbt;
 	}
 	public static <KN extends Tag,VN extends Tag,K extends INBTSerializable<KN>, V extends INBTSerializable<VN>> 
@@ -103,20 +104,27 @@ public class GenericUtils {
 				K key = keyFactory.get();
 				Tag keyNBT = nbt.get("k"+i);
 				keyDeserializer.accept(key, (KN)keyNBT);
-				
+
 				V value = valueFactory.get();
 				Tag valueNBT = nbt.get("v"+i);
 				valueDeserializer.accept(value, (VN)valueNBT);
-				
+
 				map.put(key, value);
 			} catch (ClassCastException e) { }
 		}
 	}
-	
+
+	public static float lerpF(float f, float a, float b) {
+		return (float) lerpD(f, a, b);
+	}
+	public static double lerpD(double f, double a, double b) {
+		return a * (1f - f) + (b * f);
+	}
+
 	@Getter(value = AccessLevel.PRIVATE, lazy = true)
 	private static final Field mobEffectDurationField = ObfuscationReflectionHelper.findField(MobEffectInstance.class, "duration");
-	public static void mapAndUpdateDuration(MobEffectInstance effectInstance, Int2IntFunction mapper) {
-		
+	private static void mapAndUpdateDuration(MobEffectInstance effectInstance, Int2IntFunction mapper) {
+
 		Field durationField = GenericUtils.getMobEffectDurationField();
 		int mappedDuration = effectInstance.mapDuration(mapper);
 		if (durationField.canAccess(effectInstance) || durationField.trySetAccessible()) {
@@ -127,6 +135,15 @@ public class GenericUtils {
 			}
 		} else {
 			CyberhiveMod.LOGGER.error("Unable to update MobEffectInstanceDuration");
+		}
+	}
+	public static void mapAndUpdateDuration(LivingEntity entity, MobEffectInstance effectInstance, Int2IntFunction mapper) {
+		mapAndUpdateDuration(entity, effectInstance, mapper, true);
+	}
+	public static void mapAndUpdateDuration(LivingEntity entity, MobEffectInstance effectInstance, Int2IntFunction mapper, boolean propagateToClient) {
+		mapAndUpdateDuration(effectInstance, mapper);
+		if (!entity.level().isClientSide() && propagateToClient) {
+			entity.forceAddEffect(effectInstance, entity);
 		}
 	}
 }
