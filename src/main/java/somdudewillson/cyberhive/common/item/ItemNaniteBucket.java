@@ -28,7 +28,7 @@ public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 
 	@Override
 	public int getNanitesInItem() {
-		return RawNaniteGooBlock.NANITES_PER_LAYER*8;
+		return RawNaniteGooBlock.NANITES_PER_LAYER*RawNaniteGooBlock.MAX_HEIGHT;
 	}
 
 	@Override
@@ -37,7 +37,19 @@ public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 	}
 	
 	@Override
-	public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {		
+	public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+		int layersToPlace = RawNaniteGooBlock.MAX_HEIGHT;
+		
+		BlockState clickedBlockState = context.getLevel().getBlockState(context.getClickedPos());
+		if (clickedBlockState.is(CyberBlocks.RAW_NANITE_GOO.get()) 
+				&& clickedBlockState.getValue(RawNaniteGooBlock.LAYERS)<RawNaniteGooBlock.MAX_HEIGHT) {
+			layersToPlace -= RawNaniteGooBlock.MAX_HEIGHT-clickedBlockState.getValue(RawNaniteGooBlock.LAYERS);
+			context.getLevel().setBlockAndUpdate(
+					context.getClickedPos(), 
+					clickedBlockState.setValue(RawNaniteGooBlock.LAYERS, RawNaniteGooBlock.MAX_HEIGHT));
+		}
+		
+		if (layersToPlace<=0) { return InteractionResult.SUCCESS; }
 		BlockPos targetPos = context.getClickedPos().relative(context.getClickedFace());
 		BlockState targetState = context.getLevel().getBlockState(targetPos);
 		if (targetState.canBeReplaced(Fluids.FLOWING_WATER)) {
@@ -52,7 +64,7 @@ public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 			context.getLevel().gameEvent(context.getPlayer(), GameEvent.FLUID_PLACE, targetPos);
 			context.getLevel().setBlockAndUpdate(
 					targetPos, 
-					CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState().setValue(RawNaniteGooBlock.LAYERS, 8));
+					CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState().setValue(RawNaniteGooBlock.LAYERS, layersToPlace));
 			
 			return InteractionResult.SUCCESS;
 		}
