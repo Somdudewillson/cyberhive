@@ -14,5 +14,7 @@ public abstract class AbstractNaniteStorageItem extends Item {
 	public int getNanitesInItemStack(ItemStack itemStack) {
 		return this.getNanitesInItem()*itemStack.getCount();
 	}
+	
+	public boolean directlyCraftable() { return true; }
 
 }

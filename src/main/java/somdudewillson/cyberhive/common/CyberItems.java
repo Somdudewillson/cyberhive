@@ -15,6 +15,7 @@ import somdudewillson.cyberhive.CyberhiveMod;
 import somdudewillson.cyberhive.common.data.StandardItemModelProvider;
 import somdudewillson.cyberhive.common.item.ItemNanitePile;
 import somdudewillson.cyberhive.common.item.ItemNaniteDust;
+import somdudewillson.cyberhive.common.item.ItemNaniteBottle;
 import somdudewillson.cyberhive.common.item.ItemNaniteClump;
 
 public class CyberItems {
@@ -24,6 +25,8 @@ public class CyberItems {
 	public static final RegistryObject<Item> NANITE_DUST = registerItem("nanite_dust", ItemNaniteDust::new, true, true);
 	public static final RegistryObject<Item> NANITE_PILE = registerItem("nanite_pile", ItemNanitePile::new, true, true);
 	public static final RegistryObject<Item> NANITE_CLUMP = registerItem("nanite_clump", ItemNaniteClump::new, true, true);
+
+	public static final RegistryObject<Item> NANITE_BOTTLE = registerItem("bottle_o_nanites", ItemNaniteBottle::new, true, true);
 	
 	//Item Tags ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public static final TagKey<Item> NANITE_STORAGE_ITEM_TAG = ItemTags.create(new ResourceLocation(CyberhiveMod.MODID, "nanite_storage_items"));
