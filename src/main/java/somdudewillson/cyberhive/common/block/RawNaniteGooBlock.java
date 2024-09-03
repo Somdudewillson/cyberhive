@@ -7,10 +7,16 @@ import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -21,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -34,8 +41,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 import somdudewillson.cyberhive.common.CyberBlocks;
+import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
 import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
+import somdudewillson.cyberhive.common.tileentity.PressurizedNaniteGooTileEntity;
 import somdudewillson.cyberhive.common.utils.NaniteConversionUtils;
 
 public class RawNaniteGooBlock extends Block {
@@ -100,6 +109,7 @@ public class RawNaniteGooBlock extends Block {
     	return Arrays.asList(NaniteConversionUtils.convertNanitesToItemStacks(pState.getValue(LAYERS)*NANITES_PER_LAYER));
     }
 
+	@SuppressWarnings("deprecation")
 	@Override
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		if (pLevel.isClientSide) { return; }
@@ -321,6 +331,71 @@ public class RawNaniteGooBlock extends Block {
 		
 		return result;
 	}
+	
+
+
+	@SuppressWarnings("deprecation")
+	public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+		ItemStack itemstack = pPlayer.getItemInHand(pHand);
+		int layerCount = pState.getValue(LAYERS);
+		int totalLayerCount = layerCount;
+		BlockState belowState = pLevel.getBlockState(pPos.below());
+		if (belowState.is(CyberBlocks.RAW_NANITE_GOO.get())) {
+			totalLayerCount += belowState.getValue(LAYERS);
+		} else if (belowState.is(CyberBlocks.PRESSURIZED_NANITE_GOO.get())) {
+			totalLayerCount += ( (PressurizedNaniteGooTileEntity) pLevel.getBlockEntity(pPos.below()) ).getNaniteQuantity() / NANITES_PER_LAYER;
+		}
+		
+		int layersRemoved = 0;
+		boolean interaction = false;
+		if (totalLayerCount >= 2) {
+			if (itemstack.is(Items.GLASS_BOTTLE)) {
+				itemstack.shrink(1);
+				pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+				if (itemstack.isEmpty()) {
+					pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BOTTLE.get()));
+				} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BOTTLE.get()))) {
+					pPlayer.drop(new ItemStack(CyberItems.NANITE_BOTTLE.get()), false);
+				}
+
+				pLevel.gameEvent(pPlayer, GameEvent.FLUID_PICKUP, pPos);
+				layersRemoved += 2;
+				interaction = true;
+			}
+		}
+
+		if (interaction) {
+			if (layersRemoved > 0) {
+				if (layerCount-layersRemoved <= 0) {
+					pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+					
+					if (layerCount-layersRemoved < 0) {
+						layersRemoved -= layerCount;
+						
+						if (belowState.is(CyberBlocks.RAW_NANITE_GOO.get())) {
+							if (belowState.getValue(LAYERS) > layersRemoved) {
+								pLevel.setBlockAndUpdate(pPos.below(), pState.setValue(LAYERS, belowState.getValue(LAYERS)-layersRemoved));
+							} else {
+								pLevel.setBlockAndUpdate(pPos.below(), Blocks.AIR.defaultBlockState());
+							}
+						} else if (belowState.is(CyberBlocks.PRESSURIZED_NANITE_GOO.get())) {
+							PressurizedNaniteGooTileEntity gooEntity = (PressurizedNaniteGooTileEntity) pLevel.getBlockEntity(pPos.below());
+							if (gooEntity.getNaniteQuantity() > layersRemoved*NANITES_PER_LAYER) {
+								gooEntity.setNaniteQuantity( (short) (gooEntity.getNaniteQuantity()-(layersRemoved*NANITES_PER_LAYER)) );
+							} else {
+								pLevel.setBlockAndUpdate(pPos.below(), Blocks.AIR.defaultBlockState());
+							} 
+						}
+					}
+				} else {
+					pLevel.setBlockAndUpdate(pPos, pState.setValue(LAYERS, layerCount));
+				}
+			}
+			return InteractionResult.sidedSuccess(pLevel.isClientSide);
+		}
+		return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+	}
+	
 	
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
