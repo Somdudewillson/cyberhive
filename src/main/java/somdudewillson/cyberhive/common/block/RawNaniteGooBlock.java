@@ -44,7 +44,6 @@ import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.converteffects.IBlockConversion;
 import somdudewillson.cyberhive.common.converteffects.NaniteGrassConversion;
-import somdudewillson.cyberhive.common.item.AbstractNaniteStorageItem;
 import somdudewillson.cyberhive.common.tileentity.PressurizedNaniteGooTileEntity;
 import somdudewillson.cyberhive.common.utils.NaniteConversionUtils;
 
@@ -163,14 +162,11 @@ public class RawNaniteGooBlock extends Block {
 					NaniteConversionUtils.convertItemStackToNanites(itemEntityTuple.getA().getItem())*0.6 ))
 			.filter(itemEntityTuple->itemEntityTuple.getB()>0)
 			.mapToDouble(itemEntityTuple->{
-				if (itemEntityTuple.getA().getItem().getItem() instanceof AbstractNaniteStorageItem) {
-					ItemStack[] extraItems = ((AbstractNaniteStorageItem) itemEntityTuple.getA().getItem().getItem()).extraItems();
-					for (ItemStack extraItem : extraItems) {
-						pLevel.addFreshEntity(new ItemEntity(pLevel, 
-								itemEntityTuple.getA().getX(), itemEntityTuple.getA().getY(), itemEntityTuple.getA().getZ(), 
-								extraItem,
-								0, 0.1, 0));
-					}
+				if (itemEntityTuple.getA().getItem().hasCraftingRemainingItem()) {
+					pLevel.addFreshEntity(new ItemEntity(pLevel, 
+							itemEntityTuple.getA().getX(), itemEntityTuple.getA().getY(), itemEntityTuple.getA().getZ(), 
+							itemEntityTuple.getA().getItem().getCraftingRemainingItem(),
+							0, 0.1, 0));
 				}
 				itemEntityTuple.getA().kill();
 				return itemEntityTuple.getB();

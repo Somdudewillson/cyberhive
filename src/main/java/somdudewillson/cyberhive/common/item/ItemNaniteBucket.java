@@ -32,8 +32,13 @@ public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 	}
 
 	@Override
-	public ItemStack[] extraItems() {
-		return new ItemStack[] {new ItemStack(Items.BUCKET)};
+	public boolean hasCraftingRemainingItem(ItemStack stack) {
+		return true;
+	}
+
+	@Override
+	public ItemStack getCraftingRemainingItem(ItemStack itemStack) {
+		return new ItemStack(Items.BUCKET);
 	}
 	
 	@Override
