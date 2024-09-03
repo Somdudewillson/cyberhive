@@ -45,11 +45,11 @@ public class NaniteConversionUtils {
 	}
 	
 	public static double convertItemStackToNanites(ItemStack itemStack) {
-		if (itemStack.isEdible()) {
-			return convertFoodToNanites(itemStack.getFoodProperties(null))*itemStack.getCount();
-		}
 		if (itemStack.getItem() instanceof AbstractNaniteStorageItem) {
 			return ((AbstractNaniteStorageItem) itemStack.getItem()).getNanitesInItemStack(itemStack);
+		}
+		if (itemStack.isEdible()) {
+			return convertFoodToNanites(itemStack.getFoodProperties(null))*itemStack.getCount();
 		}
 		return 0;
 	}
