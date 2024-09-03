@@ -78,10 +78,6 @@ public class ContactEvents {
 			NaniteCoatedEffect.addNanitesToCoat(livingEntity, RawNaniteGooBlock.NANITES_PER_LAYER);
 			return true;
 		}
-		if (blockAtPos == CyberBlocks.NANITE_GRASS.get()) {
-			NaniteCoatedEffect.addNanitesToCoat(livingEntity, RawNaniteGooBlock.NANITES_PER_LAYER/4d);
-			return true;
-		}
 		
 		return false;
 	}
