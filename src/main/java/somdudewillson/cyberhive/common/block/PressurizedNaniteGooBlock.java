@@ -12,7 +12,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -24,8 +23,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 import somdudewillson.cyberhive.common.CyberBlocks;
@@ -81,6 +78,7 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
     	return Collections.emptyList();
     }
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		if (pLevel.isClientSide) { return; } 
@@ -135,12 +133,16 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 		if (
 				(
 						(driftRoll < 0.8 
-						&& (consideredState = pLevel.getBlockState( (consideredPos = pPos.above())) ).is(CyberBlocks.RAW_NANITE_GOO.get()))
+						&& ( (consideredState = pLevel.getBlockState( (consideredPos = pPos.above())) )
+								.is(CyberBlocks.RAW_NANITE_GOO.get())) 
+								|| !consideredState.getFluidState().isEmpty() )
 						||
-						(driftRoll < 0.4
-						&& (consideredState = pLevel.getBlockState( (consideredPos = pPos.relative(Direction.values()[pRand.nextInt(2, 6)]))) ).is(CyberBlocks.RAW_NANITE_GOO.get()))
+						(driftRoll < 0.3
+						&& ( (consideredState = pLevel.getBlockState( (consideredPos = pPos.relative(Direction.values()[pRand.nextInt(2, 6)]))) )
+								.is(CyberBlocks.RAW_NANITE_GOO.get()))
+								|| !consideredState.getFluidState().isEmpty() )
 				)
-				&& consideredState.getValue(RawNaniteGooBlock.LAYERS)==RawNaniteGooBlock.MAX_HEIGHT
+				&& (!consideredState.hasProperty(RawNaniteGooBlock.LAYERS) || consideredState.getValue(RawNaniteGooBlock.LAYERS)==RawNaniteGooBlock.MAX_HEIGHT)
 			) {
 			moveSelf(pLevel, pPos, pState, consideredPos, consideredState);
 			return true;
