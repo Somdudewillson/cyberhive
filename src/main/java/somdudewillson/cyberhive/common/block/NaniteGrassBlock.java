@@ -99,6 +99,7 @@ public class NaniteGrassBlock extends Block {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void trySpread(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
 		if (pState.getValue(SPREAD_STRENGTH) == 0) { return; }
 		if (pRandom.nextInt() >= pState.getValue(SPREAD_STRENGTH)) { return; }
