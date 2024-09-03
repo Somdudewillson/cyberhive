@@ -103,9 +103,11 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 			pressurizedEntity.setNaniteQuantity(naniteQuantity);
 	    	pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(
 	    			this, pPos, this.tickRate(pLevel), TickPriority.LOW, 0));
-		} else {
+		} else if (naniteQuantity/RawNaniteGooBlock.NANITES_PER_LAYER>0) {
 			pLevel.setBlockAndUpdate(pPos, CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState()
 					.setValue(RawNaniteGooBlock.LAYERS, naniteQuantity/RawNaniteGooBlock.NANITES_PER_LAYER));
+		} else {
+			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
 		}
     }
 	
@@ -126,18 +128,18 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 		return false;
 	}
 	
-	private boolean tryDrift(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
+	private boolean tryDrift(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {		
 		float driftRoll = pRand.nextFloat();
 		BlockState consideredState = pState;
 		BlockPos consideredPos = pPos;
 		if (
 				(
-						(driftRoll < 0.8 
+						(driftRoll < 0.5 
 						&& ( (consideredState = pLevel.getBlockState( (consideredPos = pPos.above())) )
 								.is(CyberBlocks.RAW_NANITE_GOO.get())) 
 								|| !consideredState.getFluidState().isEmpty() )
 						||
-						(driftRoll < 0.3
+						(driftRoll < 0.15
 						&& ( (consideredState = pLevel.getBlockState( (consideredPos = pPos.relative(Direction.values()[pRand.nextInt(2, 6)]))) )
 								.is(CyberBlocks.RAW_NANITE_GOO.get()))
 								|| !consideredState.getFluidState().isEmpty() )
