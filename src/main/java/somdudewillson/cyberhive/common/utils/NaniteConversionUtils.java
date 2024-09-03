@@ -61,6 +61,7 @@ public class NaniteConversionUtils {
 					.filter(i->i instanceof AbstractNaniteStorageItem)
 					.map(i->(AbstractNaniteStorageItem) i)
 					.filter(i->i.getNanitesInItem()>0)
+					.filter(i->!i.hasCraftingRemainingItem(new ItemStack(i)))
 					.sorted(Comparator.comparingInt(AbstractNaniteStorageItem::getNanitesInItem).reversed())
 					.toArray(AbstractNaniteStorageItem[]::new);
 		
