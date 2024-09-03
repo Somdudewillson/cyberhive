@@ -103,9 +103,9 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 			pressurizedEntity.setNaniteQuantity(naniteQuantity);
 	    	pLevel.getBlockTicks().schedule(new ScheduledTick<Block>(
 	    			this, pPos, this.tickRate(pLevel), TickPriority.LOW, 0));
-		} else if (naniteQuantity/RawNaniteGooBlock.NANITES_PER_LAYER>0) {
+		} else if (naniteQuantity>0) {
 			pLevel.setBlockAndUpdate(pPos, CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState()
-					.setValue(RawNaniteGooBlock.LAYERS, naniteQuantity/RawNaniteGooBlock.NANITES_PER_LAYER));
+					.setValue(RawNaniteGooBlock.LAYERS, Math.max(1,naniteQuantity/RawNaniteGooBlock.NANITES_PER_LAYER)));
 		} else {
 			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
 		}
