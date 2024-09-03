@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "cyberhive:compacting_nanite_clump_to_bottle_o_nanites"
+        "recipe": "cyberhive:compacting_nanite_pile_to_nanite_bucket"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "cyberhive:compacting_nanite_clump_to_bottle_o_nanites"
+      "cyberhive:compacting_nanite_pile_to_nanite_bucket"
     ]
   },
   "sends_telemetry_event": false

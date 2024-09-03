@@ -28,7 +28,8 @@ public class NaniteStorageItemRecipeProvider extends RecipeProvider {
 				(AbstractNaniteStorageItem) CyberItems.NANITE_PILE.get(),
 				(AbstractNaniteStorageItem) CyberItems.NANITE_CLUMP.get(),
 				
-				(AbstractNaniteStorageItem) CyberItems.NANITE_BOTTLE.get()
+				(AbstractNaniteStorageItem) CyberItems.NANITE_BOTTLE.get(),
+				(AbstractNaniteStorageItem) CyberItems.NANITE_BUCKET.get()
 		};
 		
 		for (int i=0;i<naniteStorageItems.length-1;i++) {
@@ -44,7 +45,9 @@ public class NaniteStorageItemRecipeProvider extends RecipeProvider {
 					double outputItems = inputNanites/(double) outputItem.getNanitesInItem();
 					if (outputItems == Math.floor(outputItems)) {
 						ShapelessRecipeBuilder builder;
-						if (inputItem.extraItems().length == 0 && c+(outputItem.extraItems().length*outputItems)<=9) {
+						if (inputItem.extraItems().length == 0 
+								&& c+(outputItem.extraItems().length*outputItems)<=9 
+								&& outputItem.getMaxStackSize(new ItemStack(outputItem))>=outputItems) {
 							builder = ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, outputItem, (int) outputItems);
 							builder.requires(inputItem, c);
 							for (ItemStack extraItem : outputItem.extraItems()) {
@@ -55,7 +58,9 @@ public class NaniteStorageItemRecipeProvider extends RecipeProvider {
 							builder.save(pWriter, String.format("%s:compacting_%s_to_%s", CyberhiveMod.MODID, inputItem, outputItem));
 						}
 						
-						if (outputItems <= 9 && outputItem.extraItems().length == 0) {
+						if (outputItems <= 9 
+								&& outputItem.extraItems().length == 0
+								&& inputItem.getMaxStackSize(new ItemStack(inputItem))>=c) {
 							builder = ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, inputItem, c);
 							builder.requires(outputItem, (int) outputItems);
 							builder.unlockedBy(GOT_NANITE_STORAGE_ITEM_KEY, RecipeProvider.has(CyberItems.NANITE_STORAGE_ITEM_TAG));

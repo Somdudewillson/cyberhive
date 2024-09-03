@@ -211,6 +211,8 @@ public class RawNaniteGooBlock extends Block {
 	}
 	
 	private int spread(BlockState pState, ServerLevel pLevel, RandomSource pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
+		if (layers<=1) { return layers; }
+		
 		for (int adjIdx=0;adjIdx<adjacent.length;adjIdx++) {
 			BlockPos adjPos = adjacent[adjIdx];
 			BlockState adjState = adjStates[adjIdx];
@@ -358,20 +360,32 @@ public class RawNaniteGooBlock extends Block {
 		
 		int layersRemoved = 0;
 		boolean interaction = false;
-		if (totalLayerCount >= 2) {
-			if (itemstack.is(Items.GLASS_BOTTLE)) {
-				itemstack.shrink(1);
-				pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
-				if (itemstack.isEmpty()) {
-					pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BOTTLE.get()));
-				} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BOTTLE.get()))) {
-					pPlayer.drop(new ItemStack(CyberItems.NANITE_BOTTLE.get()), false);
-				}
-
-				pLevel.gameEvent(pPlayer, GameEvent.FLUID_PICKUP, pPos);
-				layersRemoved += 2;
-				interaction = true;
+		if (totalLayerCount >= 2 && itemstack.is(Items.GLASS_BOTTLE)) {
+			pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+			itemstack.shrink(1);
+			if (itemstack.isEmpty()) {
+				pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BOTTLE.get()));
+			} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BOTTLE.get()))) {
+				pPlayer.drop(new ItemStack(CyberItems.NANITE_BOTTLE.get()), false);
 			}
+
+			pLevel.gameEvent(pPlayer, GameEvent.FLUID_PICKUP, pPos);
+			layersRemoved += 2;
+			interaction = true;
+		} else if (totalLayerCount >= 8 && itemstack.is(Items.BUCKET)) {
+			pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+			if (!pPlayer.getAbilities().instabuild) {
+				itemstack.shrink(1);
+				if (itemstack.isEmpty()) {
+					pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BUCKET.get()));
+				} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BUCKET.get()))) {
+					pPlayer.drop(new ItemStack(CyberItems.NANITE_BUCKET.get()), false);
+				}
+			}
+
+			pLevel.gameEvent(pPlayer, GameEvent.FLUID_PICKUP, pPos);
+			layersRemoved += 8;
+			interaction = true;
 		}
 
 		if (interaction) {
