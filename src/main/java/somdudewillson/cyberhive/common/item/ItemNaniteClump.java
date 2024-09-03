@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 import somdudewillson.cyberhive.common.entity.projectile.NaniteClumpProjectile;
 
 public class ItemNaniteClump extends AbstractNaniteStorageItem {
@@ -25,7 +26,7 @@ public class ItemNaniteClump extends AbstractNaniteStorageItem {
 
 	@Override
 	public int getNanitesInItem() {
-		return 9*4;
+		return RawNaniteGooBlock.NANITES_PER_LAYER*4;
 	}
 
 	public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {

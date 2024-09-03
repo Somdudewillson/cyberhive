@@ -2,6 +2,7 @@
 package somdudewillson.cyberhive.common.item;
 
 import net.minecraft.world.item.Item;
+import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 
 public class ItemNanitePile extends AbstractNaniteStorageItem {
 	
@@ -16,6 +17,6 @@ public class ItemNanitePile extends AbstractNaniteStorageItem {
 
 	@Override
 	public int getNanitesInItem() {
-		return 9;
+		return RawNaniteGooBlock.NANITES_PER_LAYER;
 	}
 }
