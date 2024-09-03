@@ -4,13 +4,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.event.TickEvent.LevelTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.level.ChunkDataEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,19 +18,12 @@ import somdudewillson.cyberhive.CyberhiveMod;
 import somdudewillson.cyberhive.common.utils.ExtChunkPos;
 
 public class NaniteDataCloud {
-	private static final String CHUNK_NANITE_DATA_KEY = CyberhiveMod.MODID+":"+"chunk_nanite_cloud";
+	private static final String CHUNK_NANITE_DATA_KEY = CyberhiveMod.MODID+":"+"chunk_nanite_data";
 	
-	private static ConcurrentHashMap<String, NaniteDimensionData> naniteDataByDimension = new ConcurrentHashMap<>();
+	@Getter
+	private static final NaniteDataCloud INSTANCE = new NaniteDataCloud();
 	
-	@SubscribeEvent
-	public void worldCloudUpdate(LevelTickEvent event) {
-		if (event.side.isClient()) { return; }
-		if (event.phase != Phase.END) { return; }
-		
-		String currentDimension = event.level.dimension().toString();
-		if (!naniteDataByDimension.containsKey(currentDimension)) { return; }
-		naniteDataByDimension.get(currentDimension).tick((ServerLevel) event.level);
-	}
+	private final ConcurrentHashMap<ChunkPosRef, NaniteChunkData> loadedChunkDataMap = new ConcurrentHashMap<>();
 	
 	@SubscribeEvent
 	public void loadChunkNaniteData(ChunkDataEvent.Load event) {
@@ -38,17 +31,12 @@ public class NaniteDataCloud {
 		LevelAccessor level = event.getLevel();
 		
 		NaniteChunkData loadedChunkData = new NaniteChunkData();
-		loadedChunkData.setChunkPos(new ExtChunkPos(event.getChunk().getPos()));
+		ExtChunkPos loadedChunkPos = new ExtChunkPos(event.getChunk().getPos());
+		loadedChunkData.setChunkPos(loadedChunkPos);
 		loadedChunkData.deserializeNBT(event.getData().getCompound(CHUNK_NANITE_DATA_KEY));
 		String currentDimension = level.dimensionType().toString();
-		naniteDataByDimension.compute(currentDimension, (k, v)->{
-			if (v == null) {
-				v = new NaniteDimensionData();
-			}
-			v.addChunkData(new ExtChunkPos(event.getChunk().getPos()), loadedChunkData);
-			
-			return v;
-		});
+		
+		loadedChunkDataMap.put(new ChunkPosRef(currentDimension, loadedChunkPos), loadedChunkData);
 	}
 	
 	@SubscribeEvent
@@ -56,10 +44,11 @@ public class NaniteDataCloud {
 		LevelAccessor level = event.getLevel();
 		
 		String currentDimension = level.dimensionType().toString();
-		NaniteDimensionData dimData = naniteDataByDimension.get(currentDimension);
-		if (dimData == null) { return; }
-		NaniteChunkData chunkData = dimData.getChunkData(new ExtChunkPos(event.getChunk().getPos()));
+		ExtChunkPos extChunkPos = new ExtChunkPos(event.getChunk().getPos());
+		NaniteChunkData chunkData = loadedChunkDataMap.get(new ChunkPosRef(currentDimension, extChunkPos));
 		if (chunkData == null) { return; }
+		if (chunkData.getListenerCount() == 0) { return; }
+		
 		event.getData().put(CHUNK_NANITE_DATA_KEY, chunkData.serializeNBT());
 	}
 	
@@ -68,29 +57,23 @@ public class NaniteDataCloud {
 		LevelAccessor level = event.getLevel();
 
 		String currentDimension = level.dimensionType().toString();
-		naniteDataByDimension.computeIfPresent(currentDimension, (k, v)->{
-			v.removeChunkData(new ExtChunkPos(event.getChunk().getPos()));
-			if (v.getLoadedChunks()<=0) {
-				return null;
-			}
-			return v;
-		});
+		ExtChunkPos extChunkPos = new ExtChunkPos(event.getChunk().getPos());
+		loadedChunkDataMap.remove(new ChunkPosRef(currentDimension, extChunkPos));		
 	}
-
-	public static boolean hasNaniteDataForDim(LevelAccessor level) {
-		String currentDimension = level.dimensionType().toString();
-		return naniteDataByDimension.containsKey(currentDimension);
-	}
-	public static @Nullable NaniteDimensionData getNaniteDataForDim(LevelAccessor level) {
-		String currentDimension = level.dimensionType().toString();
-		return naniteDataByDimension.get(currentDimension);
-	}
-	public static @Nullable NaniteChunkData getNaniteDataForChunk(LevelChunk chunk) {
+	
+	public @Nullable NaniteChunkData getNaniteDataForChunk(LevelChunk chunk) {
 		return getNaniteDataForChunkPos(chunk.getLevel(), new ExtChunkPos(chunk.getPos()));
 	}
-	public static @Nullable NaniteChunkData getNaniteDataForChunkPos(Level world, ExtChunkPos chunkPos) {
-		NaniteDimensionData naniteDimData = getNaniteDataForDim(world);
-		if (naniteDimData == null) { return null; }
-		return naniteDimData.getChunkData(chunkPos);
+	public @Nullable NaniteChunkData getNaniteDataForChunkPos(Level world, ExtChunkPos chunkPos) {
+		return loadedChunkDataMap.get(new ChunkPosRef(world.dimensionType().toString(), chunkPos));
+	}
+	
+	
+	@Getter
+	@EqualsAndHashCode
+	@AllArgsConstructor
+	public static class ChunkPosRef {
+		private String dimensionId;
+		private ExtChunkPos chunkPos;
 	}
 }
