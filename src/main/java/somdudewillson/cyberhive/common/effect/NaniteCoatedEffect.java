@@ -13,8 +13,6 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import somdudewillson.cyberhive.common.CyberBlocks;
@@ -25,6 +23,7 @@ import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 import somdudewillson.cyberhive.common.utils.GenericUtils;
 import somdudewillson.cyberhive.common.utils.NaniteConversionUtils;
+import somdudewillson.cyberhive.common.utils.WorldNaniteUtils;
 
 public class NaniteCoatedEffect extends MobEffect {
 	public static final int DURATION_FOR_MAX_EFFECT = 20*30;
@@ -108,10 +107,7 @@ public class NaniteCoatedEffect extends MobEffect {
 	private boolean doDrip(LivingEntity pLivingEntity, double naniteAmount) {
     	Optional<BlockPos> spawnPos = BlockPos.findClosestMatch(
     			pLivingEntity.blockPosition(), 3, 15, 
-    			p -> {
-    				BlockState testState = pLivingEntity.level().getBlockState(p);
-    				return testState.canBeReplaced(Fluids.FLOWING_WATER) && testState.getFluidState().isEmpty();
-    			});
+    			p -> WorldNaniteUtils.canReplace(pLivingEntity.level().getBlockState(p)));
     	if (spawnPos.isEmpty()) { return false; }
 
     	if (!pLivingEntity.level().isClientSide()) {

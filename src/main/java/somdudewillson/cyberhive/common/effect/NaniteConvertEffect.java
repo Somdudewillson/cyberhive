@@ -11,12 +11,11 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberDamageTypes;
 import somdudewillson.cyberhive.common.block.PressurizedNaniteGooBlock;
 import somdudewillson.cyberhive.common.utils.NaniteConversionUtils;
+import somdudewillson.cyberhive.common.utils.WorldNaniteUtils;
 
 public class NaniteConvertEffect extends MobEffect {
 
@@ -39,10 +38,7 @@ public class NaniteConvertEffect extends MobEffect {
         if (!pLivingEntity.isAlive()) {
         	Optional<BlockPos> spawnPos = BlockPos.findClosestMatch(
         			pLivingEntity.blockPosition(), 3, 15, 
-        			p -> {
-        				BlockState testState = pLivingEntity.level().getBlockState(p);
-        				return testState.canBeReplaced(Fluids.FLOWING_WATER) && testState.getFluidState().isEmpty();
-        			});
+        			p -> WorldNaniteUtils.canReplace(pLivingEntity.level().getBlockState(p)));
         	
         	if (spawnPos.isPresent()) {
 	        	pLivingEntity.level().setBlockAndUpdate(

@@ -3,10 +3,10 @@ package somdudewillson.cyberhive.common;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import somdudewillson.cyberhive.common.item.AbstractNaniteStorageItem;
+import somdudewillson.cyberhive.common.utils.WorldNaniteUtils;
 
 public class ItemDecayEvents {
 	
@@ -21,11 +21,14 @@ public class ItemDecayEvents {
 		}
 	}
 	
+	private static final int MAX_HEIGHT_STEPS = 8;
 	private void dumpNanitesFromItem(Level world, ItemEntity itemEntity) {
 		BlockPos spawnPos = itemEntity.blockPosition();
-		while (!world.getFluidState(spawnPos).isEmpty() || !world.getBlockState(spawnPos).canBeReplaced(Fluids.FLOWING_WATER)) {
+		int heightSteps = 0;
+		while (!WorldNaniteUtils.canReplace(world.getBlockState(spawnPos))) {
 			spawnPos = spawnPos.above();
 			if (spawnPos.getY()>=world.getMaxBuildHeight()-1) { return; }
+			if (heightSteps++ > MAX_HEIGHT_STEPS) { return; }
 		}
 		if (spawnPos.getY()>=world.getMaxBuildHeight()-1) { return; }
 		

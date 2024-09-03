@@ -9,14 +9,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.HitResult;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.CyberEntities;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 import somdudewillson.cyberhive.common.utils.NaniteSharedEffects;
+import somdudewillson.cyberhive.common.utils.WorldNaniteUtils;
 
 public class NaniteClumpProjectile extends ThrowableItemProjectile {
 
@@ -52,10 +51,7 @@ public class NaniteClumpProjectile extends ThrowableItemProjectile {
 					pResult.getLocation().z);
 			Optional<BlockPos> spawnPos = BlockPos.findClosestMatch(
 					hitBlockPos, 3, 3, 
-					testPos -> {
-						BlockState blockState = this.level().getBlockState(testPos);
-						return blockState.canBeReplaced(Fluids.FLOWING_WATER) && blockState.getFluidState().isEmpty();
-					});
+					testPos -> WorldNaniteUtils.canReplace(this.level().getBlockState(testPos)));
 			if (spawnPos.isPresent()) {
 				this.level().setBlockAndUpdate(
 						spawnPos.get(), 
