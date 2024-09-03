@@ -33,8 +33,8 @@ public class ItemNaniteBottle extends AbstractNaniteStorageItem {
 	}
 
 	@Override
-	public boolean directlyCraftable() {
-		return false;
+	public ItemStack[] extraItems() {
+		return new ItemStack[] {new ItemStack(Items.GLASS_BOTTLE)};
 	}
 
 	@Override

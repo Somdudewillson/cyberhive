@@ -16,5 +16,8 @@ public abstract class AbstractNaniteStorageItem extends Item {
 	}
 	
 	public boolean directlyCraftable() { return true; }
+	public ItemStack[] extraItems() {
+		return new ItemStack[0];
+	}
 
 }
