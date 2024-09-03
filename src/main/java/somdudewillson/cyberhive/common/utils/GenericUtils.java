@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -15,6 +16,7 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
@@ -73,6 +75,32 @@ public class GenericUtils {
 	}
 	public static BlockPos deserializeBlockPos(BlockPos __, NumericTag nbt) {
 		return BlockPos.of(nbt.getAsLong());
+	}
+	
+	public static <K extends INBTSerializable<? extends Tag>> ListTag serializeList(List<K> list) {
+		return serializeList(list, K::serializeNBT);
+	}
+	public static <K, V extends Tag> ListTag serializeList(List<K> list, Function<K, V> valueSerializer) {
+		ListTag listTag = new ListTag();
+		list.stream().map(valueSerializer).forEachOrdered(listTag::add);
+
+		return listTag;
+	}
+	public static <KN extends Tag,K extends INBTSerializable<KN>> List<K> deserializeIntoList(
+			ListTag nbt, List<K> list, Supplier<K> valueFactory) {
+		return deserializeIntoList(nbt, list, valueFactory, K::deserializeNBT);
+	}
+	@SuppressWarnings("unchecked")
+	public static <KN extends Tag,K> List<K> deserializeIntoList(ListTag nbt, List<K> list, 
+			Supplier<K> valueFactory, BiConsumer<K, KN> valueDeserializer) {
+		nbt.stream()
+			.map(t -> {
+				K val = valueFactory.get();
+				valueDeserializer.accept(val, (KN)t);
+				return val;
+			})
+			.forEachOrdered(list::add);
+		return list;
 	}
 
 	public static <K extends INBTSerializable<? extends Tag>, V extends INBTSerializable<? extends Tag>> CompoundTag serializeMap(Map<K,V> map) {
