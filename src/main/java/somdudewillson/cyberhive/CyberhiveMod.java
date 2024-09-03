@@ -24,6 +24,7 @@ import somdudewillson.cyberhive.common.CyberEntities;
 import somdudewillson.cyberhive.common.CyberItems;
 import somdudewillson.cyberhive.common.CyberParticles;
 import somdudewillson.cyberhive.common.CyberPotions;
+import somdudewillson.cyberhive.common.ItemDecayEvents;
 import somdudewillson.cyberhive.common.nanitedatacloud.NaniteDataCloud;
 
 @Mod(CyberhiveMod.MODID)
@@ -69,6 +70,7 @@ public class CyberhiveMod {
         MinecraftForge.EVENT_BUS.register(this);
         
         MinecraftForge.EVENT_BUS.register(new ContactEvents());
+        MinecraftForge.EVENT_BUS.register(new ItemDecayEvents());
         MinecraftForge.EVENT_BUS.register(NaniteDataCloud.getINSTANCE());
         
 	    CyberhiveMod.LOGGER.debug("Registered to EVENT_BUS");
