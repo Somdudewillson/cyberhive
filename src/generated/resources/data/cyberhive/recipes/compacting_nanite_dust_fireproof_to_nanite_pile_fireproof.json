@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "compacting",
+  "ingredients": [
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    },
+    {
+      "item": "cyberhive:nanite_dust_fireproof"
+    }
+  ],
+  "result": {
+    "item": "cyberhive:nanite_pile_fireproof"
+  }
+}

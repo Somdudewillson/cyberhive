@@ -1,6 +1,11 @@
-// 1.20.1	2024-09-02T22:54:50.5890417	Item Models: cyberhive
+// 1.20.1	2024-09-03T16:16:08.8514372	Item Models: cyberhive
 a9078a4fb2c3a83742f976deffff6a3b04dd7d9d assets/cyberhive/models/item/bottle_o_nanites.json
+ad2c2feafcdcd9b535e08a9d9d34fb664fc2cde5 assets/cyberhive/models/item/bottle_o_nanites_fireproof.json
 e63d343477e67ee936ce92c0571e1bd32020bfb3 assets/cyberhive/models/item/nanite_bucket.json
+c3e469686fe549ffea88d35af33d3d2a14581a22 assets/cyberhive/models/item/nanite_bucket_fireproof.json
 62f954afc1dd190d87d5b4c3fdb24c4ccce6fa33 assets/cyberhive/models/item/nanite_clump.json
+d55f7e7e7998baa196cb24abfa10c7a3a952776a assets/cyberhive/models/item/nanite_clump_fireproof.json
 18cfd25c7f8fccd7cf034a9a8f1883c643a7612e assets/cyberhive/models/item/nanite_dust.json
+b473e4e5fdf6548cb0170db7042325784dbca927 assets/cyberhive/models/item/nanite_dust_fireproof.json
 c8ebabaeaeac34994abac9ef025a2c5a2cae5d34 assets/cyberhive/models/item/nanite_pile.json
+6c1c8919abda2eabac98bb9224ceb52df3213ca9 assets/cyberhive/models/item/nanite_pile_fireproof.json

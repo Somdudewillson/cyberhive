@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "fire_immune=false": {
       "model": "cyberhive:block/pressurized_nanite_goo"
+    },
+    "fire_immune=true": {
+      "model": "cyberhive:block/pressurized_nanite_goo-fire_immune"
     }
   }
 }

@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.tags.TagsProvider.TagLookup;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,8 +14,9 @@ import somdudewillson.cyberhive.CyberhiveMod;
 import somdudewillson.cyberhive.common.data.CyberDamageTypeProvider;
 import somdudewillson.cyberhive.common.data.CyberDamageTypeTagsProvider;
 import somdudewillson.cyberhive.common.data.NaniteStorageItemRecipeProvider;
-import somdudewillson.cyberhive.common.data.StandardItemModelProvider;
+import somdudewillson.cyberhive.common.data.NaniteStorageTagProvider;
 import somdudewillson.cyberhive.common.data.RawGooBlockStateProvider;
+import somdudewillson.cyberhive.common.data.StandardItemModelProvider;
 
 @Mod.EventBusSubscriber(modid = CyberhiveMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataGatherer {
@@ -24,8 +26,12 @@ public class DataGatherer {
 		DataGenerator gen = event.getGenerator();
 		ExistingFileHelper efh = event.getExistingFileHelper();
 		CompletableFuture<Provider> lookupProvider = event.getLookupProvider();
-
+		
 		CyberhiveMod.LOGGER.debug("Adding data providers...");
+		gen.addProvider(
+				event.includeServer(),
+				(DataProvider.Factory<NaniteStorageTagProvider>) output -> new NaniteStorageTagProvider(output, lookupProvider, CompletableFuture.completedFuture(TagLookup.empty()), efh)
+				);
 		gen.addProvider(
 				event.includeServer(),
 				NaniteStorageItemRecipeProvider::new

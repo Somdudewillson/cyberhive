@@ -1,10 +1,18 @@
-// 1.20.1	2024-09-03T10:23:08.6331527	Block States: cyberhive
-0e66b7a676e7fc9d7657c33ec0a220e357bc352d assets/cyberhive/blockstates/raw_nanite_goo.json
+// 1.20.1	2024-09-03T11:25:55.5073666	Block States: cyberhive
+62e880f86f5fcfe3873e95dfba63dee17ddba62a assets/cyberhive/blockstates/raw_nanite_goo.json
+84e184e86fbffcc357fe61ad293293dde1c611f5 assets/cyberhive/models/block/raw_nanite_goo_1-fire_immune.json
 f6db1b3430178ae5169f5aeec6abfc92e750d4f3 assets/cyberhive/models/block/raw_nanite_goo_1.json
+a6aff1f13a01b3c297918c0fc0a34dd0b9759409 assets/cyberhive/models/block/raw_nanite_goo_2-fire_immune.json
 2f6d41bb2e432552f0cc806bdded97ff0464e7c0 assets/cyberhive/models/block/raw_nanite_goo_2.json
+4c56c1cd769896112668f36784f9e6245ccf389c assets/cyberhive/models/block/raw_nanite_goo_3-fire_immune.json
 7858ac32f9a23e89004a916b59719a741de78ecb assets/cyberhive/models/block/raw_nanite_goo_3.json
+97d0bfc92403c95cb1a7aa515891d981f2cdf63f assets/cyberhive/models/block/raw_nanite_goo_4-fire_immune.json
 109ed1ca1aeef07d632cbd3a4d71c3f060372d94 assets/cyberhive/models/block/raw_nanite_goo_4.json
+914c02c77213642c569c787b6354b65d2146cf52 assets/cyberhive/models/block/raw_nanite_goo_5-fire_immune.json
 58802a9ff1f2fbd5668ee9dbfd4b28092a0766f5 assets/cyberhive/models/block/raw_nanite_goo_5.json
+3757158afcaca8b5ca210ff4f75e5e9a213ebc91 assets/cyberhive/models/block/raw_nanite_goo_6-fire_immune.json
 483d43b5acd1755d162ff82db2a06e42c8a15a82 assets/cyberhive/models/block/raw_nanite_goo_6.json
+61e757b4741b8aaa8581d81cbfee0e6fff920c5a assets/cyberhive/models/block/raw_nanite_goo_7-fire_immune.json
 0f3fa8c0dfab7b3d4d7112d1dfc8e23d9da92acc assets/cyberhive/models/block/raw_nanite_goo_7.json
+a89754b6a18fd5f83ffb67d518b783e8bcdfad74 assets/cyberhive/models/block/raw_nanite_goo_8-fire_immune.json
 91a45e82339153b3d7dedfafa7bd58530082c3ab assets/cyberhive/models/block/raw_nanite_goo_8.json

@@ -18,8 +18,8 @@ import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 
 public class ItemNaniteBottle extends AbstractNaniteStorageItem {
 
-	public ItemNaniteBottle() {
-		super((new Item.Properties()).stacksTo(16).food(CyberFoods.NANITE_BOTTLE));
+	public ItemNaniteBottle(boolean fireResistant) {
+		super((new Item.Properties()).stacksTo(16).food(CyberFoods.NANITE_BOTTLE), fireResistant);
 	}
 
 	@Override

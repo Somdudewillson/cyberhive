@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "got_nanite_storage_item": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "cyberhive:nanite_storage_items"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "cyberhive:decompacting_nanite_clump_fireproof_to_nanite_pile_fireproof"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "got_nanite_storage_item",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cyberhive:decompacting_nanite_clump_fireproof_to_nanite_pile_fireproof"
+    ]
+  },
+  "sends_telemetry_event": false
+}

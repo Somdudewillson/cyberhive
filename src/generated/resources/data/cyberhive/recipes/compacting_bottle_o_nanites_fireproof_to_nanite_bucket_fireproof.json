@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "compacting",
+  "ingredients": [
+    {
+      "item": "cyberhive:bottle_o_nanites_fireproof"
+    },
+    {
+      "item": "cyberhive:bottle_o_nanites_fireproof"
+    },
+    {
+      "item": "cyberhive:bottle_o_nanites_fireproof"
+    },
+    {
+      "item": "cyberhive:bottle_o_nanites_fireproof"
+    },
+    {
+      "item": "minecraft:bucket"
+    }
+  ],
+  "result": {
+    "item": "cyberhive:nanite_bucket_fireproof"
+  }
+}

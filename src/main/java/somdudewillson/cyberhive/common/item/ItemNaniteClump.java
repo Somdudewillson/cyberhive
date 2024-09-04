@@ -15,8 +15,8 @@ import somdudewillson.cyberhive.common.entity.projectile.NaniteClumpProjectile;
 
 public class ItemNaniteClump extends AbstractNaniteStorageItem {
 
-	public ItemNaniteClump() {
-		super((new Item.Properties()).stacksTo(16));
+	public ItemNaniteClump(boolean fireResistant) {
+		super((new Item.Properties()).stacksTo(16), fireResistant);
 	}
 
 	@Override

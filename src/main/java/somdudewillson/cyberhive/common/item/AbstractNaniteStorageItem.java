@@ -5,8 +5,8 @@ import net.minecraft.world.item.ItemStack;
 
 public abstract class AbstractNaniteStorageItem extends Item {
 
-	public AbstractNaniteStorageItem(Properties pProperties) {
-		super(pProperties);
+	public AbstractNaniteStorageItem(Item.Properties pProperties, boolean fireResistant) {
+		super(fireResistant ? pProperties.fireResistant() : pProperties);
 	}
 	
 	public abstract int getNanitesInItem();

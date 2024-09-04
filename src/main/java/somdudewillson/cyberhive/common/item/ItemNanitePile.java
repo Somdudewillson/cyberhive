@@ -6,8 +6,8 @@ import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
 
 public class ItemNanitePile extends AbstractNaniteStorageItem {
 	
-	public ItemNanitePile() {
-		super((new Item.Properties()).stacksTo(64));
+	public ItemNanitePile(boolean fireResistant) {
+		super((new Item.Properties()).stacksTo(64), fireResistant);
 	}
 
 	@Override

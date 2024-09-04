@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.ticks.ScheduledTick;
@@ -32,6 +33,10 @@ import somdudewillson.cyberhive.common.utils.WorldNaniteUtils;
 public class PressurizedNaniteGooBlock extends Block implements EntityBlock {	
 	public PressurizedNaniteGooBlock() {
 		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(50.0F).sound(SoundType.SLIME_BLOCK));
+
+		registerDefaultState(this.defaultBlockState()
+				.setValue(RawNaniteGooBlock.FIRE_IMMUNE, false)
+				);
 	}
 	
 	public int tickRate(Level worldIn) {
@@ -59,7 +64,8 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 			if (blockEntity instanceof PressurizedNaniteGooTileEntity) {
 				
 				ItemStack[] itemStacks = NaniteConversionUtils.convertNanitesToItemStacks(
-						((PressurizedNaniteGooTileEntity) blockEntity).getNaniteQuantity());
+						((PressurizedNaniteGooTileEntity) blockEntity).getNaniteQuantity(),
+						pState.getValue(RawNaniteGooBlock.FIRE_IMMUNE));
 				for (ItemStack itemStack : itemStacks) {
 					Containers.dropItemStack(
 							pLevel, 
@@ -97,7 +103,7 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 		PressurizedNaniteGooTileEntity pressurizedEntity = (PressurizedNaniteGooTileEntity) blockEntity;
 		
 		short naniteQuantity = pressurizedEntity.getNaniteQuantity();
-		naniteQuantity = spread(pLevel, pPos, pRand, naniteQuantity);
+		naniteQuantity = spread(pLevel, pPos, pState, pRand, naniteQuantity);
 		
 		if (naniteQuantity>RawNaniteGooBlock.MAX_NANITES) {
 			pressurizedEntity.setNaniteQuantity(naniteQuantity);
@@ -162,7 +168,7 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 		pLevel.setBlock(curPos, targetState, 3|64);
 	}
 	
-	private short spread(ServerLevel pLevel, BlockPos pPos, RandomSource pRand, short naniteQuantity) {
+	private short spread(ServerLevel pLevel, BlockPos pPos, BlockState pState, RandomSource pRand, short naniteQuantity) {
 		BlockPos[] adjacent = new BlockPos[] {pPos.north(),pPos.east(),pPos.south(),pPos.west(),pPos.above()};
 		
 		for (int adjIdx=0;adjIdx<adjacent.length && naniteQuantity>RawNaniteGooBlock.MAX_NANITES;adjIdx++) {
@@ -171,22 +177,32 @@ public class PressurizedNaniteGooBlock extends Block implements EntityBlock {
 			
 			if (WorldNaniteUtils.canReplace(adjState)) {
 				BlockState newState = CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState()
-						.setValue(RawNaniteGooBlock.LAYERS, 1);
+						.setValue(RawNaniteGooBlock.LAYERS, 1)
+						.setValue(RawNaniteGooBlock.FIRE_IMMUNE, pState.getValue(RawNaniteGooBlock.FIRE_IMMUNE));
 				pLevel.setBlockAndUpdate(adjPos, newState);
 				naniteQuantity -= RawNaniteGooBlock.NANITES_PER_LAYER;
 				continue;
 			}
 			if (adjState.getBlock() == CyberBlocks.RAW_NANITE_GOO.get()
 					&& adjState.getValue(RawNaniteGooBlock.LAYERS)<RawNaniteGooBlock.MAX_HEIGHT) {
-				BlockState newState = adjState.setValue(
-						RawNaniteGooBlock.LAYERS,
-						adjState.getValue(RawNaniteGooBlock.LAYERS)+1);
+				BlockState newState = adjState
+						.setValue(
+							RawNaniteGooBlock.LAYERS,
+							adjState.getValue(RawNaniteGooBlock.LAYERS)+1)
+						.setValue(
+								RawNaniteGooBlock.FIRE_IMMUNE, 
+								adjState.getValue(RawNaniteGooBlock.FIRE_IMMUNE)||pState.getValue(RawNaniteGooBlock.FIRE_IMMUNE));
 				pLevel.setBlockAndUpdate(adjPos, newState);
 				naniteQuantity -= RawNaniteGooBlock.NANITES_PER_LAYER;
 			}
 		}
 		
 		return naniteQuantity;
+	}
+	
+	@Override
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+		pBuilder.add(RawNaniteGooBlock.FIRE_IMMUNE);
 	}
     
     @Override

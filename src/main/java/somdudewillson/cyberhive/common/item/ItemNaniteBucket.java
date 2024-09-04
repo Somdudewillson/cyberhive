@@ -11,14 +11,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Fluids;
 import somdudewillson.cyberhive.common.CyberBlocks;
 import somdudewillson.cyberhive.common.block.RawNaniteGooBlock;
+import somdudewillson.cyberhive.common.utils.WorldNaniteUtils;
 
 public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 
-	public ItemNaniteBucket() {
-		super((new Item.Properties()).stacksTo(1));
+	public ItemNaniteBucket(boolean fireResistant) {
+		super((new Item.Properties()).stacksTo(1), fireResistant);
 	}
 
 	@Override
@@ -51,13 +51,15 @@ public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 			layersToPlace -= RawNaniteGooBlock.MAX_HEIGHT-clickedBlockState.getValue(RawNaniteGooBlock.LAYERS);
 			context.getLevel().setBlockAndUpdate(
 					context.getClickedPos(), 
-					clickedBlockState.setValue(RawNaniteGooBlock.LAYERS, RawNaniteGooBlock.MAX_HEIGHT));
+					clickedBlockState
+						.setValue(RawNaniteGooBlock.LAYERS, RawNaniteGooBlock.MAX_HEIGHT)
+						.setValue(RawNaniteGooBlock.FIRE_IMMUNE, clickedBlockState.getValue(RawNaniteGooBlock.FIRE_IMMUNE) || stack.getItem().isFireResistant()));
 		}
 		
 		if (layersToPlace<=0) { return InteractionResult.SUCCESS; }
 		BlockPos targetPos = context.getClickedPos().relative(context.getClickedFace());
 		BlockState targetState = context.getLevel().getBlockState(targetPos);
-		if (targetState.canBeReplaced(Fluids.FLOWING_WATER)) {
+		if (WorldNaniteUtils.canReplace(targetState)) {
 
 			if (!context.getPlayer().getAbilities().instabuild) {
 				context.getPlayer().setItemInHand(context.getHand(), new ItemStack(Items.BUCKET));
@@ -69,7 +71,9 @@ public class ItemNaniteBucket extends AbstractNaniteStorageItem {
 			context.getLevel().gameEvent(context.getPlayer(), GameEvent.FLUID_PLACE, targetPos);
 			context.getLevel().setBlockAndUpdate(
 					targetPos, 
-					CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState().setValue(RawNaniteGooBlock.LAYERS, layersToPlace));
+					CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState()
+						.setValue(RawNaniteGooBlock.LAYERS, layersToPlace)
+						.setValue(RawNaniteGooBlock.FIRE_IMMUNE, stack.getItem().isFireResistant()));
 			
 			return InteractionResult.SUCCESS;
 		}

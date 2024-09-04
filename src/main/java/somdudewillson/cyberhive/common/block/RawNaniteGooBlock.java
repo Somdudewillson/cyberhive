@@ -3,6 +3,7 @@ package somdudewillson.cyberhive.common.block;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 import net.minecraft.core.BlockPos;
@@ -25,8 +26,11 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -50,13 +54,17 @@ public class RawNaniteGooBlock extends Block {
 	public static final int MAX_NANITES = NANITES_PER_LAYER*MAX_HEIGHT;
 	public static final int SELF_SUPPORT_LAYERS = MAX_HEIGHT / 2;
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, MAX_HEIGHT);
+	public static final BooleanProperty FIRE_IMMUNE = BooleanProperty.create("fire_immune");
 	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[] {Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
 	protected static final IBlockConversion[] blockConversions = new IBlockConversion[] { new NaniteGrassConversion() }; 
 	
 	public RawNaniteGooBlock() {
 		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0F, 6.0F).speedFactor(0.7F).pushReaction(PushReaction.DESTROY).sound(SoundType.SLIME_BLOCK));
 		
-		registerDefaultState(this.defaultBlockState().setValue(LAYERS, Integer.valueOf(MAX_HEIGHT)));
+		registerDefaultState(this.defaultBlockState()
+				.setValue(LAYERS, Integer.valueOf(MAX_HEIGHT))
+				.setValue(FIRE_IMMUNE, false)
+				);
 	}
 	
 	public int tickRate(Level worldIn) {
@@ -103,7 +111,9 @@ public class RawNaniteGooBlock extends Block {
     
     @Override
     public List<ItemStack> getDrops(BlockState pState, LootParams.Builder pBuilder) {
-    	return Arrays.asList(NaniteConversionUtils.convertNanitesToItemStacks(pState.getValue(LAYERS)*NANITES_PER_LAYER));
+    	return Arrays.asList(NaniteConversionUtils.convertNanitesToItemStacks(
+    			pState.getValue(LAYERS)*NANITES_PER_LAYER,
+    			pState.getValue(FIRE_IMMUNE)));
     }
 
 	@SuppressWarnings("deprecation")
@@ -120,6 +130,12 @@ public class RawNaniteGooBlock extends Block {
     }
 	
 	private boolean innerTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
+		if (!pLevel.getFluidState(pPos.above()).isEmpty()) {
+			Block.dropResources(pState, pLevel, pPos, null);
+			pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+			return false;
+		}
+		
 		// Consume food items
 		if ( ((pLevel.getGameTime()/tickRate(pLevel)+pPos.asLong()) & 7) == 0 ) {
 			boolean halt = tryConsumeItems(pState, pLevel, pPos, pRand);
@@ -135,7 +151,20 @@ public class RawNaniteGooBlock extends Block {
 		IntStream.range(0, adjacent.length)
 			.forEach(adjIdx->adjStates[adjIdx]=pLevel.getBlockState(adjacent[adjIdx]));
 		
+		
 		int layers = pState.getValue(LAYERS);
+		if (!pState.getValue(FIRE_IMMUNE) && tryBurn(pState, pLevel, pRand, adjacent, adjStates)) {
+			if (pRand.nextFloat()<0.01) {
+				pLevel.setBlockAndUpdate(pPos, pState.setValue(FIRE_IMMUNE, true));
+				return true;
+			}
+			layers--;
+			if (layers <= 0) {
+				pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+				pLevel.playSound(null, pPos.getX(), pPos.getY(), pPos.getZ(), SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.2F, 0.95F);
+				return false;
+			}
+		}
 		layers = spread(pState, pLevel, pRand, adjacent, adjStates, layers);
 		layers = cluster(pPos, pState, pLevel, pRand, adjacent, adjStates, layers);
 		if (layers>0) {
@@ -154,6 +183,7 @@ public class RawNaniteGooBlock extends Block {
 
 	private boolean tryConsumeItems(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
 		VoxelShape shape = getShape(pState, pLevel, pPos, null);
+		AtomicBoolean makeFireImmune = new AtomicBoolean(false);
 		double addedNanites = pLevel.getEntitiesOfClass( ItemEntity.class, shape.bounds().move(pPos.getCenter()).inflate(0.15, 0.334, 0.15) )
 			.stream()
 			.map(itemEntity->new Tuple<>(itemEntity, itemEntity.getItem()))
@@ -168,6 +198,7 @@ public class RawNaniteGooBlock extends Block {
 							itemEntityTuple.getA().getItem().getCraftingRemainingItem(),
 							0, 0.1, 0));
 				}
+				makeFireImmune.compareAndSet(false, itemEntityTuple.getA().getItem().getItem().isFireResistant());
 				itemEntityTuple.getA().kill();
 				return itemEntityTuple.getB();
 			})
@@ -175,8 +206,9 @@ public class RawNaniteGooBlock extends Block {
 		if (addedNanites <= 0) { return false; }
 		
 		if (addedNanites > MAX_NANITES-(pState.getValue(LAYERS)*NANITES_PER_LAYER) ) {
-			pLevel.setBlockAndUpdate(pPos, CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState());
-			PressurizedNaniteGooBlock.setNaniteQuantity(pLevel, pPos, (short)Math.round(addedNanites));
+			pLevel.setBlockAndUpdate(pPos, CyberBlocks.PRESSURIZED_NANITE_GOO.get().defaultBlockState()
+					.setValue(FIRE_IMMUNE, pState.getValue(FIRE_IMMUNE) || makeFireImmune.get()));
+			PressurizedNaniteGooBlock.setNaniteQuantity(pLevel, pPos, (short)Math.round(addedNanites+MAX_NANITES));
 			return true;
 		}
 		
@@ -189,10 +221,14 @@ public class RawNaniteGooBlock extends Block {
 			int filledLayers = 0;
 			if (fillState.isAir()) {
 				filledLayers = Math.min(MAX_HEIGHT, roundedAddedLayers);
-				pLevel.setBlockAndUpdate(fillPos, defaultBlockState().setValue(LAYERS, filledLayers));
+				pLevel.setBlockAndUpdate(fillPos, pState
+						.setValue(LAYERS, filledLayers)
+						.setValue(FIRE_IMMUNE, pState.getValue(FIRE_IMMUNE) || makeFireImmune.get()));
 			} else if (fillState.is(CyberBlocks.RAW_NANITE_GOO.get())) {
 				filledLayers = Math.min(MAX_HEIGHT-fillState.getValue(LAYERS), roundedAddedLayers);
-				pLevel.setBlockAndUpdate(fillPos, fillState.setValue(LAYERS, fillState.getValue(LAYERS)+filledLayers));
+				pLevel.setBlockAndUpdate(fillPos, fillState
+						.setValue(LAYERS, fillState.getValue(LAYERS)+filledLayers)
+						.setValue(FIRE_IMMUNE, pState.getValue(FIRE_IMMUNE) || makeFireImmune.get() || fillState.getValue(FIRE_IMMUNE)));
 				if (fillPos.equals(pPos)) { changedSelf = true; }
 			} else {
 				break;
@@ -204,6 +240,14 @@ public class RawNaniteGooBlock extends Block {
 		}
 		
 		return changedSelf;
+	}
+
+	private boolean tryBurn(BlockState pState, ServerLevel pLevel, RandomSource pRand, BlockPos[] adjacent, BlockState[] adjStates) {
+		FluidState testState = adjStates[pRand.nextInt(adjStates.length)].getFluidState();
+		if (testState.is(Fluids.LAVA) || testState.is(Fluids.FLOWING_LAVA)) {
+			return true;
+		}
+		return false;
 	}
 	
 	private int spread(BlockState pState, ServerLevel pLevel, RandomSource pRand, BlockPos[] adjacent, BlockState[] adjStates, int layers) {
@@ -219,7 +263,8 @@ public class RawNaniteGooBlock extends Block {
 			if (adjBlock == CyberBlocks.RAW_NANITE_GOO.get()) {
 				int adjLayers = adjState.getValue(LAYERS);
 				if (adjLayers<8 && layers-adjLayers+(pRand.nextFloat()-0.99)>1) {
-					BlockState newState = adjState.setValue(LAYERS, adjLayers+1);
+					BlockState newState = adjState.setValue(LAYERS, adjLayers+1)
+							.setValue(FIRE_IMMUNE, adjState.getValue(FIRE_IMMUNE) || pState.getValue(FIRE_IMMUNE));
 					pLevel.setBlockAndUpdate(adjPos, newState);
 					tryFall(newState, pLevel, adjPos);
 					layers--;
@@ -236,7 +281,7 @@ public class RawNaniteGooBlock extends Block {
 				generateNewBlock = true;
 			}
 			if (generateNewBlock) {
-				BlockState newState = pState.getBlock().defaultBlockState().setValue(LAYERS, 1);
+				BlockState newState = pState.setValue(LAYERS, 1);
 				pLevel.setBlockAndUpdate(adjPos, newState);
 				tryFall(newState, pLevel, adjPos);
 				layers--;
@@ -382,15 +427,16 @@ public class RawNaniteGooBlock extends Block {
 	@SuppressWarnings("deprecation")
 	public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
 		ItemStack itemstack = pPlayer.getItemInHand(pHand);
+		boolean isFireResistant = pState.getValue(FIRE_IMMUNE);
 		
 		boolean interaction = false;
 		if (itemstack.is(Items.GLASS_BOTTLE) && WorldNaniteUtils.trySiphonLayers(pLevel, pPos, MAX_HEIGHT/4)) {
 			pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
 			itemstack.shrink(1);
 			if (itemstack.isEmpty()) {
-				pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BOTTLE.get()));
-			} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BOTTLE.get()))) {
-				pPlayer.drop(new ItemStack(CyberItems.NANITE_BOTTLE.get()), false);
+				pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BOTTLE.getByFireResistance(isFireResistant)));
+			} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BOTTLE.getByFireResistance(isFireResistant)))) {
+				pPlayer.drop(new ItemStack(CyberItems.NANITE_BOTTLE.getByFireResistance(isFireResistant)), false);
 			}
 
 			pLevel.gameEvent(pPlayer, GameEvent.FLUID_PICKUP, pPos);
@@ -400,9 +446,9 @@ public class RawNaniteGooBlock extends Block {
 			if (!pPlayer.getAbilities().instabuild) {
 				itemstack.shrink(1);
 				if (itemstack.isEmpty()) {
-					pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BUCKET.get()));
-				} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BUCKET.get()))) {
-					pPlayer.drop(new ItemStack(CyberItems.NANITE_BUCKET.get()), false);
+					pPlayer.setItemInHand(pHand, new ItemStack(CyberItems.NANITE_BUCKET.getByFireResistance(isFireResistant)));
+				} else if (!pPlayer.getInventory().add(new ItemStack(CyberItems.NANITE_BUCKET.getByFireResistance(isFireResistant)))) {
+					pPlayer.drop(new ItemStack(CyberItems.NANITE_BUCKET.getByFireResistance(isFireResistant)), false);
 				}
 			}
 
@@ -420,6 +466,7 @@ public class RawNaniteGooBlock extends Block {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
 		pBuilder.add(LAYERS);
+		pBuilder.add(FIRE_IMMUNE);
 	}
     
     @Override

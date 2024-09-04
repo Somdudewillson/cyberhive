@@ -11,7 +11,7 @@ import net.minecraftforge.registries.RegistryObject;
 import somdudewillson.cyberhive.CyberhiveMod;
 
 public class StandardItemModelProvider extends ItemModelProvider {
-	private static final LinkedList<RegistryObject<Item>> ITEMS_NEEDING_MODELS = new LinkedList<>();
+	private static final LinkedList<RegistryObject<? extends Item>> ITEMS_NEEDING_MODELS = new LinkedList<>();
 
 	public StandardItemModelProvider(PackOutput output, String modid, ExistingFileHelper existingFileHelper) {
 		super(output, modid, existingFileHelper);
@@ -20,14 +20,14 @@ public class StandardItemModelProvider extends ItemModelProvider {
 	@Override
 	protected void registerModels() {
 		CyberhiveMod.LOGGER.debug("Generating simple item models...");
-		for (RegistryObject<Item> itemRegistry : ITEMS_NEEDING_MODELS) {
+		for (RegistryObject<? extends Item> itemRegistry : ITEMS_NEEDING_MODELS) {
 			basicItem(itemRegistry.get());
 		}
 		CyberhiveMod.LOGGER.debug("Generated {} item models for items.", ITEMS_NEEDING_MODELS.size());
 	}
 	
 	@Synchronized("ITEMS_NEEDING_MODELS")
-	public static void registerItemNeedingModel(RegistryObject<Item> itemRegistryObject) {
+	public static void registerItemNeedingModel(RegistryObject<? extends Item> itemRegistryObject) {
 		ITEMS_NEEDING_MODELS.add(itemRegistryObject);
 	}
 

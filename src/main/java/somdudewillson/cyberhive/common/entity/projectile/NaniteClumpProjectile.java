@@ -33,7 +33,7 @@ public class NaniteClumpProjectile extends ThrowableItemProjectile {
 
 	@Override
 	protected Item getDefaultItem() {
-		return CyberItems.NANITE_CLUMP.get();
+		return CyberItems.NANITE_CLUMP.getNormalItem();
 	}
 
 	protected void onHit(HitResult pResult) {
@@ -56,7 +56,8 @@ public class NaniteClumpProjectile extends ThrowableItemProjectile {
 				this.level().setBlockAndUpdate(
 						spawnPos.get(), 
 						CyberBlocks.RAW_NANITE_GOO.get().defaultBlockState()
-							.setValue(RawNaniteGooBlock.LAYERS, 1));
+							.setValue(RawNaniteGooBlock.LAYERS, 1)
+							.setValue(RawNaniteGooBlock.FIRE_IMMUNE, getItem().getItem().isFireResistant()));
 			}
 			
 			this.discard();

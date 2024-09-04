@@ -5,8 +5,8 @@ import net.minecraft.world.item.Item;
 
 public class ItemNaniteDust extends AbstractNaniteStorageItem {
 	
-	public ItemNaniteDust() {
-		super((new Item.Properties()).stacksTo(64));
+	public ItemNaniteDust(boolean fireResistant) {
+		super((new Item.Properties()).stacksTo(64), fireResistant);
 	}
 
 	@Override

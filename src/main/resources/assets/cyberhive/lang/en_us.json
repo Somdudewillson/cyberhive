@@ -4,6 +4,12 @@
 "item.cyberhive.nanite_clump": "Nanite Clump",
 "item.cyberhive.bottle_o_nanites": "Bottle of Nanite Goo",
 "item.cyberhive.nanite_bucket": "Nanite Goo Bucket",
+"item.cyberhive.nanite_dust_fireproof": "Heatproof Nanite Dust",
+"item.cyberhive.nanite_pile_fireproof": "Heatproof Nanite Pile",
+"item.cyberhive.nanite_clump_fireproof": "Heatproof Nanite Clump",
+"item.cyberhive.bottle_o_nanites_fireproof": "Bottle of Heatproof Nanite Goo",
+"item.cyberhive.nanite_bucket_fireproof": "Heatproof Nanite Goo Bucket",
+
 "block.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
 "tile.cyberhive.raw_nanite_goo": "Raw Nanite Goo",
 "block.cyberhive.pressurized_nanite_goo": "Pressurized Nanite Goo",

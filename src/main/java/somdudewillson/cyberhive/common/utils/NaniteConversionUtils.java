@@ -54,13 +54,14 @@ public class NaniteConversionUtils {
 		return 0;
 	}
 	
-	public static ItemStack[] convertNanitesToItemStacks(int nanites) {
+	public static ItemStack[] convertNanitesToItemStacks(int nanites, boolean fireResistant) {
 		AbstractNaniteStorageItem[] naniteStorageItems = ForgeRegistries.ITEMS.tags()
 				.getTag(CyberItems.NANITE_STORAGE_ITEM_TAG)
 					.stream()
 					.filter(i->i instanceof AbstractNaniteStorageItem)
 					.map(i->(AbstractNaniteStorageItem) i)
 					.filter(i->i.getNanitesInItem()>0)
+					.filter(i->i.isFireResistant()==fireResistant)
 					.filter(i->!i.hasCraftingRemainingItem(new ItemStack(i)))
 					.sorted(Comparator.comparingInt(AbstractNaniteStorageItem::getNanitesInItem).reversed())
 					.toArray(AbstractNaniteStorageItem[]::new);
