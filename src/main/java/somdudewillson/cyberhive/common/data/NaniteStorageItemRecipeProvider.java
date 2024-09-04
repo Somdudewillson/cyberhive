@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -20,7 +21,8 @@ import somdudewillson.cyberhive.common.data.utils.ExtShapelessRecipeBuilder;
 import somdudewillson.cyberhive.common.data.utils.RecipeInputSignature;
 
 public class NaniteStorageItemRecipeProvider extends RecipeProvider {
-	private static final String GOT_NANITE_STORAGE_ITEM_KEY = "got_nanite_storage_item";
+	private static final String GOT_NORMAL_NANITE_STORAGE_ITEM_KEY = "got_normal_nanite_storage_item";
+	private static final String GOT_FIREPROOF_NANITE_STORAGE_ITEM_KEY = "got_fireproof_nanite_storage_item";
 
 	public NaniteStorageItemRecipeProvider(PackOutput pOutput) {
 		super(pOutput);
@@ -58,14 +60,22 @@ public class NaniteStorageItemRecipeProvider extends RecipeProvider {
 						
 						if (c+(outputItem.getCraftingRemainingItem(outputItemStack).getCount()*exactOutputItems)<=9 
 								&& outputItem.getMaxStackSize(outputItemStack)>=exactOutputItems) {
-							buildRecipe(partialRecipeMap, "compacting", inputItem.getNormalItem(), c, outputItem.getNormalItem(), exactOutputItems);
-							buildRecipe(partialRecipeMap, "compacting", inputItem.getFireResistantItem(), c, outputItem.getFireResistantItem(), exactOutputItems);
+							buildRecipe(partialRecipeMap, "compacting", 
+									new Tuple<>(GOT_NORMAL_NANITE_STORAGE_ITEM_KEY, RecipeProvider.has(CyberItems.NORMAL_NANITE_STORAGE_ITEM_TAG)),
+									inputItem.getNormalItem(), c, outputItem.getNormalItem(), exactOutputItems);
+							buildRecipe(partialRecipeMap, "compacting", 
+									new Tuple<>(GOT_FIREPROOF_NANITE_STORAGE_ITEM_KEY, RecipeProvider.has(CyberItems.FIREPROOF_NANITE_STORAGE_ITEM_TAG)),
+									inputItem.getFireResistantItem(), c, outputItem.getFireResistantItem(), exactOutputItems);
 						}
 						
 						if (exactOutputItems+(inputItem.getCraftingRemainingItem(inputItemStack).getCount()*c) <= 9 
 								&& inputItem.getMaxStackSize(inputItemStack)>=c) {
-							buildRecipe(partialRecipeMap, "decompacting", outputItem.getNormalItem(), exactOutputItems, inputItem.getNormalItem(), c);
-							buildRecipe(partialRecipeMap, "decompacting", outputItem.getFireResistantItem(), exactOutputItems, inputItem.getFireResistantItem(), c);
+							buildRecipe(partialRecipeMap, "decompacting", 
+									new Tuple<>(GOT_NORMAL_NANITE_STORAGE_ITEM_KEY, RecipeProvider.has(CyberItems.NORMAL_NANITE_STORAGE_ITEM_TAG)),
+									outputItem.getNormalItem(), exactOutputItems, inputItem.getNormalItem(), c);
+							buildRecipe(partialRecipeMap, "decompacting", 
+									new Tuple<>(GOT_FIREPROOF_NANITE_STORAGE_ITEM_KEY, RecipeProvider.has(CyberItems.FIREPROOF_NANITE_STORAGE_ITEM_TAG)),
+									outputItem.getFireResistantItem(), exactOutputItems, inputItem.getFireResistantItem(), c);
 						}
 						
 						CyberhiveMod.LOGGER.info("Generated "+inputItem+" <--> "+outputItem+" recipes");
@@ -78,7 +88,9 @@ public class NaniteStorageItemRecipeProvider extends RecipeProvider {
 		partialRecipeMap.values().forEach(e -> e.getB().save(pWriter, e.getA()));
 	}
 	
-	private void buildRecipe(HashMap<RecipeInputSignature, Tuple<String, ExtShapelessRecipeBuilder>> partialRecipeMap, String recipeGroup, 
+	private void buildRecipe(
+			HashMap<RecipeInputSignature, Tuple<String, ExtShapelessRecipeBuilder>> partialRecipeMap, String recipeGroup,
+			Tuple<String, CriterionTriggerInstance> trigger,
 			Item inputItem, int inputCount, Item outputItem, int outputCount) {
 		ItemStack outputItemStack = new ItemStack(outputItem);
 		
@@ -89,7 +101,7 @@ public class NaniteStorageItemRecipeProvider extends RecipeProvider {
 			ItemStack remStack = outputItem.getCraftingRemainingItem(outputItemStack);
 			builder.requires(Ingredient.of(remStack.copyWithCount(1)), remStack.getCount()*outputCount);
 		}
-		builder.unlockedBy(GOT_NANITE_STORAGE_ITEM_KEY, RecipeProvider.has(CyberItems.NANITE_STORAGE_ITEM_TAG));
+		builder.unlockedBy(trigger.getA(), trigger.getB());
 		builder.group(recipeGroup);
 		partialRecipeMap.merge(
 				builder.getInputSignature(), 

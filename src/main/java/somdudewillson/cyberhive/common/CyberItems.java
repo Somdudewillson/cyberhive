@@ -36,6 +36,8 @@ public class CyberItems {
 	
 	//Item Tags ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public static final TagKey<Item> NANITE_STORAGE_ITEM_TAG = ItemTags.create(new ResourceLocation(CyberhiveMod.MODID, "nanite_storage_items"));
+	public static final TagKey<Item> NORMAL_NANITE_STORAGE_ITEM_TAG = ItemTags.create(new ResourceLocation(CyberhiveMod.MODID, "nanite_storage_items/normal"));
+	public static final TagKey<Item> FIREPROOF_NANITE_STORAGE_ITEM_TAG = ItemTags.create(new ResourceLocation(CyberhiveMod.MODID, "nanite_storage_items/fireproof"));
 	
 	//Creative Tab ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     public static final RegistryObject<CreativeModeTab> CYBER_HIVE_TAB = CyberhiveMod.CREATIVE_MODE_TABS

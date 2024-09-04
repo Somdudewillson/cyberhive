@@ -1,2 +1,4 @@
-// 1.20.1	2024-09-03T16:16:08.8504373	Tags for minecraft:item mod id cyberhive
-7cf53f7b5edc127136f7da90ea911e1243014961 data/cyberhive/tags/items/nanite_storage_items.json
+// 1.20.1	2024-09-03T17:39:03.0434868	Tags for minecraft:item mod id cyberhive
+9163e00a3da75bb33ac9b9b53b39b772d356c334 data/cyberhive/tags/items/nanite_storage_items.json
+a3e135284608876697491ca66e2647a34f162ad8 data/cyberhive/tags/items/nanite_storage_items/fireproof.json
+48c1e9235c3f7c4ecce3f7eadb5a757e8bda0af8 data/cyberhive/tags/items/nanite_storage_items/normal.json

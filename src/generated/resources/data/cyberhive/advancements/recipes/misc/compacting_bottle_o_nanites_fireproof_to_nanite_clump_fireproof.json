@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "got_nanite_storage_item": {
+    "got_fireproof_nanite_storage_item": {
       "conditions": {
         "items": [
           {
-            "tag": "cyberhive:nanite_storage_items"
+            "tag": "cyberhive:nanite_storage_items/fireproof"
           }
         ]
       },
@@ -20,7 +20,7 @@
   },
   "requirements": [
     [
-      "got_nanite_storage_item",
+      "got_fireproof_nanite_storage_item",
       "has_the_recipe"
     ]
   ],
